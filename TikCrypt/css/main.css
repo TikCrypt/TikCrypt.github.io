@@ -1,0 +1,401 @@
+/*Z indexs are as follows: 1 = body, 2 = preview, 3 = preview overlay, 4 = hide filter, 5 = nav bar*/
+/*Pre-things*/
+:root {
+  --main-bg: rgba(254, 255, 198, 1);
+  --hide-filter-colour: black;
+}
+
+ul {
+  font-weight:normal;
+  text-align:center;
+  font-size:20px;
+  color:black;
+}
+
+li {
+  font-weight:normal;
+  text-align:center;
+  font-size:20px;
+  color:black;
+}
+
+a {
+  font-size: 15px;
+  color:black;
+  text-decoration:none;
+}
+
+img {
+  width:100%;
+  height:100%;
+}
+
+summary {
+  font-weight:bold;
+  text-align:center;
+  font-size:20px;
+  color:black;
+}
+
+body {
+  background-color:white;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+button:hover {
+  background-color: grey;
+  border-color: white;
+  color: white;
+}
+
+#desaturate-overlay {
+  z-index: 4;
+}
+
+
+/*Main*/
+.default-text {
+  font-weight:normal;
+  font-size:20px;
+  color:black;
+  font-family:sans-serif;
+}
+
+.fancy-text {
+  font-weight:normal;
+  font-style:italic;
+  font-size:20px;
+  color:black;
+  font-family:serif;
+}
+
+.title-container {
+  position:relative;
+  width:100%;
+  height:60vh;
+  border-bottom: 5px solid black;
+}
+
+.title-text {
+  position:absolute;
+  font-size:60px;
+  font-family: serif;
+  color:white;
+}
+
+.main-container {
+  position:relative;
+  text-align:left;
+  width:100%;
+}
+
+.aligninator {
+  width:50%;
+}
+
+
+/*Footer*/
+.main-footer {
+  border-top:5px solid black;
+  border-bottom:5px solid black;
+  width:100%;
+  height:50px;
+  position:relative;
+  text-align:center;
+  background-color:var(--main-bg);
+}
+
+.main-footer-text {
+  position:absolute;
+  font-size:20px;
+  color:black;
+  font-family:sans-serif;
+  font-weight:lighter;
+  text-decoration:italic;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+/*Nav bar*/
+nav {
+  background: #222;
+  display: flex;
+  z-index: 5; 
+  position: relative;
+  border-bottom: 5px solid black;
+  align-items: center;
+}
+
+nav ul {
+  list-style:none;
+  display:flex;
+  margin:0;
+  padding: 20px 40px;
+}
+
+nav li {
+  position:relative;
+}
+
+nav .nav-text {
+  font-weight:normal;
+  text-align:left;
+  font-style:italic;
+  font-size:20px;
+  color:white;
+  font-family:serif;
+}
+
+nav a {
+  display:block;
+  padding:10px 20px;
+  color:white;
+  text-decoration:none;
+  font-size:20px;
+}
+
+nav li:hover > a {
+  background:#444;
+}
+
+nav .dropdown {
+  display:none;
+  position:absolute;
+  top:100%;
+  left:0;
+  background:#333;
+  min-width:160px;
+}
+
+nav li.open .dropdown {
+  display:block;
+}
+
+nav .dropdown li {
+  width:100%;
+}
+
+.nav-list li {
+  list-style: none;
+}
+
+.nav-logo {
+  margin-left: auto;
+}
+
+.nav-logo img {
+  height: 32px;
+  display: block;
+}
+
+
+/*Settings*/
+.hide-selector {
+  margin-bottom:24px;
+  width:250px; 
+}
+
+.hide-selector label {
+  display:flex;
+  font-size:25px;
+  margin-bottom:8px;
+  color:black;
+  font-weight:bold;
+  justify-content:space-between;
+}
+
+.hide-selector label span.val {
+  color:black;
+  font-family:sans-serif;
+  font-size:20px;
+}
+
+.s-reset-button {
+  width:200px;
+  min-height:50px;
+  padding:5px;
+  background-color:lightgrey;
+  border-color:white;
+}
+
+.s-save-button {
+  width:200px;
+  min-height:50px;
+  padding:5px;
+  background-color:lightgrey;
+  border-color:white;
+}
+
+.preview {
+  position:relative;
+  height:50vh;
+  width:50vh;
+  border:5px, solid, black;
+  margin-top:10px;
+  margin-bottom:10px;
+  overflow:hidden;
+  z-index:2;
+  background:linear-gradient(black, white);
+}
+
+#preview-overlay {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:3;
+}
+
+
+
+/*Artefacts*/
+.artefact-text {
+  font-weight:normal;
+  font-size:20px;
+  color:black;
+  font-family:inherit, sans-serif;
+}
+
+.artefact-img {
+  width:40%;
+  height:40%;
+  border:5px solid black;
+  object-fit: cover;
+}
+
+.columns {
+  display:flex;
+  gap:20px;
+}
+.columns > div {
+  width:33%;
+  align-items:center;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+}
+
+.bg-slideshow-container {
+  width:100%;
+  align-items:center;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+}
+
+
+
+/*TikCryption*/
+.tc-body, body, .ar-body {
+  background-color:var(--main-bg);
+  width:100%;
+  max-width:1920px;
+  margin:0 auto;
+  z-index: 1;
+}
+
+.tc-default-text {
+  font-weight:normal;
+  text-align:left;
+  font-size:20px;
+  color:black;
+  font-family: sans-serif;
+}
+
+.tc-title-text {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:55px;
+  font-family: serif;
+  color:black;
+}
+
+.tc-container {
+  position:relative;
+  text-align:left;
+  width:100%;
+  background-color:var(--main-bg);
+}
+
+.tc-title-container {
+  position:relative;
+  width:100%;
+  height:60vh;
+  border-bottom: 5px solid black;
+}
+
+.tc-key-container {
+  display: relative; 
+  width: 70%;
+}
+
+.tc-encrypt-container {
+  display: relative;
+  align-items: center;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  width: 70%;
+}
+
+.tc-decrypt-container {
+  display: relative;
+  align-items: center;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  width: 70%;
+}
+
+.tc-auto-expand {
+  width: 80%;
+  min-height: 40px;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit, sans-serif;
+  font-size: 20px;
+}
+
+.tc-long-key {
+  white-space: normal;
+  max-width: 80%;
+  font-size: 15px;
+  font-family: inherit, sans-serif;
+  text-overflow: ellipsis;
+}
+
+.tc-encrypt-button {
+  width: 30%;
+  height: 30px;
+  padding: 5px;
+  background-color: lightgrey;
+  border-color: white;
+}
+
+.tc-decrypt-button {
+  width: 30%;
+  height: 30px;
+  padding: 5px;
+  background-color: lightgrey;
+  border-color: white;
+}
+
+.tc-copy-button {
+  width: 30%;
+  min-height: 30px;
+  padding: 5px;
+  background-color: lightgrey;
+  border-color: white;
+}
+
+
+
+/*Coin Simulator*/
+.game-container {
+  width:800px;
+  height:600px;
+  border-color:8px solid black;
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>  
+  <title>
+    TikCryption
+  </title>
+  <link rel="icon" type="image/x-icon" href="/media/logo.png">
+
+  <link href="/css/main.css" rel="stylesheet">
+  <script src="/js/script.js" defer></script>
+    
+</head>
+
+<body class = "body">
+  <nav id="nav-bar">
+    <ul>
+      <li class="nav-logo"><a href="/index.html"><img src="/media/logo.png" alt="logo"></a></li>
+      <li><a href="/index.html" class="nav-text">Overview</a>
+        <ul class="dropdown">
+          <li><a href="/index.html">Overview</a></li>
+          <li><a href="/about.html">About Me</a></li>
+          <li><a href="/projects.html">My Projects</a></li>
+        </ul>
+      </li>
+      <li><a href="/tikcryption/home.html" class="nav-text">TikCryption</a>
+        <ul class="dropdown">
+          <li><a href="/tikcryption/home.html">Home</a></li>
+          <li><a href="/tikcryption/encrypt.html">Encrypt</a></li>
+          <li><a href="/tikcryption/decrypt.html">Decrypt</a></li>
+        </ul>
+      </li>
+      <li><a href="/games/coin-sim.html" class="nav-text">Games</a>
+        <ul class="dropdown">
+          <li><a href="/games/coin-sim.html">Coin Simulator</a></li>
+        </ul>
+      </li>
+      <li><a href="/artefacts/artefacts.html" class="nav-text">Artefacts</a>
+        <ul class="dropdown">
+          <li><a href="/artefacts/artefacts.html">Artefacts</a></li>
+          <li><a href="/artefacts/reviews.html">Reviews</a></li>
+        </ul>
+      </li>
+      <li><a href="/index.html" class="nav-text" id="hide-button">Hide</a>
+      </li>
+      <li><a href="/settings.html" class="nav-text">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="tc-container">
+    <br>
+    <h2 class="fancy-text" style="font-size:30px; margin-left:30px;">Encryption Services</h2>
+    <a class="tc-default-text" style="margin-left:30px;">1 - Input text into the textarea below.</a><br>
+    <a class="tc-default-text" style="margin-left:30px;">2 - Click the encrypt button to encrypt your message.</a><br>
+    <br>
+    <a class="tc-default-text" style="margin-left:30px;">Notes:</a><br>
+    <a class="tc-default-text" style="margin-left:30px;"> - Encryption strength is still in testing but it is probably sufficient for casual purposes.</a><br>
+    <a class="tc-default-text" style="margin-left:30px;"> - Key's persist from the decryption to encryption pages!</a><br>
+    <a class="tc-default-text" style="margin-left:30px;"> - Your message doesn't, so make sure you copy it!</a><br>
+    <a class="tc-default-text" style="margin-left:30px;"> - TikCryption also works in some other languages such as Chinese.</a><br>
+    <br>
+    <br>
+
+    <textarea id="encrypt-input" class="tc-auto-expand" rows="5" oninput="autoExpand(this)" style="margin-left:30px;">Enter stuff here...</textarea>
+    <br>
+    <div class="tc-encrypt-container" style="margin-left:30px;">
+      <button class="tc-encrypt-button" onclick="encryptionFunction()"><a>Encrypt</a></button>
+      <button class="tc-encrypt-button" onclick="copyText('encrypt-input')"><a>Copy</a></button>
+      <button class="tc-encrypt-button" onclick="downloadLastKey()"><a>Download Key</a></button>
+    </div>
+    <h2 class="fancy-text" style="font-size:23px; font-weight:bold; margin-left:30px;">Your Key:</h2>
+    <button class="copy-button" onclick="copyText('key-display')" style="margin-left:30px;"><a>Copy Key</a></button>
+    <div class="tc-key-container" style="margin-left:30px;">
+      <h3 id = "key-display" class="tc-long-key">...</h3>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <br>
+
+</body>
+
+<footer class="main-footer">
+  <a class="main-footer-text">© Tik Tjin Toh</a>
+</footer>
+
+</html>
