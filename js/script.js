@@ -1,63 +1,91 @@
-//To change the background colour
-function getSavedColors() {
+//To change the background and font colours
+const STORAGE_KEY = 'themeOverrides';
+const THEME_NAMES = ['space', 'desert', 'water', 'underground'];
+const root = document.documentElement;
+
+function toHex(color) {
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.fillStyle = '#000000';
+  ctx.fillStyle = color.trim();
+  return ctx.fillStyle;
+}
+
+function getOverrides() {
   try {
-    return JSON.parse(localStorage.getItem('pageColors')) || {};
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   } catch {
     return {};
   }
 }
 
-function getCurrentPageName() {
-  const name = location.pathname.split('/').pop();
-  return name || 'index.html';
+function setThemeVars(theme, { bg, text }) {
+  root.style.setProperty(`--${theme}-bg`, bg);
+  root.style.setProperty(`--${theme}-bg-text`, text);
 }
 
-function applyBackgroundColor(color) {
-  document.documentElement.style.backgroundColor = color;
-  document.body.style.backgroundColor = color;
+function clearThemeVars(theme) {
+  root.style.removeProperty(`--${theme}-bg`);
+  root.style.removeProperty(`--${theme}-bg-text`);
 }
 
-const pageColors = getSavedColors();
-const currentColor = pageColors[getCurrentPageName()];
-if (currentColor) applyBackgroundColor(currentColor);
+const defaults = {};
+const cs = getComputedStyle(root);
+THEME_NAMES.forEach(theme => {
+  defaults[theme] = {
+    bg: toHex(cs.getPropertyValue(`--${theme}-bg`)),
+    text: toHex(cs.getPropertyValue(`--${theme}-bg-text`))
+  };
+});
 
-const pageSelect = document.getElementById('bg-page-selector');
-const colorInput = document.getElementById('bg-color-selector');
-const saveButton = document.getElementById('s-save-button');
+const overrides = getOverrides();
+THEME_NAMES.forEach(theme => {
+  if (overrides[theme]) setThemeVars(theme, overrides[theme]);
+});
 
+const themeSelect = document.getElementById('bg-page-selector');
+const bgInput     = document.getElementById('bg-color-selector');
+const fontInput   = document.getElementById('font-color-selector');
+const saveButton  = document.getElementById('s-save-button');
 const resetButton = document.getElementById('s-reset-button');
 
-if (pageSelect && colorInput && saveButton) {
-  function syncPickerToPage() {
-    const saved = getSavedColors()[pageSelect.value];
-    colorInput.value = saved || '#000000';
+if (themeSelect && bgInput && fontInput) {
+  function syncPickers() {
+    const theme = themeSelect.value;
+    const current = getOverrides()[theme] || defaults[theme];
+    bgInput.value = current.bg;
+    fontInput.value = current.text;
   }
 
-  function resetBackgroundColors() {
-    localStorage.removeItem('pageColors');
-
-    document.documentElement.style.backgroundColor = '';
-    document.body.style.backgroundColor = '';
-
-    syncPickerToPage();
+  function preview() {
+    setThemeVars(themeSelect.value, { bg: bgInput.value, text: fontInput.value });
   }
 
-  pageSelect.addEventListener('change', syncPickerToPage);
-  syncPickerToPage();
-
-  saveButton.addEventListener('click', () => {
-    const colors = getSavedColors();
-    colors[pageSelect.value] = colorInput.value;
-    localStorage.setItem('pageColors', JSON.stringify(colors));
-
-    if (pageSelect.value === getCurrentPageName()) {
-      applyBackgroundColor(colorInput.value);
-    }
+  let previousTheme = themeSelect.value;
+  themeSelect.addEventListener('change', () => {
+    const saved = getOverrides()[previousTheme];
+    if (saved) setThemeVars(previousTheme, saved);
+    else clearThemeVars(previousTheme);
+    previousTheme = themeSelect.value;
+    syncPickers();
   });
 
-  if (resetButton) {
-    resetButton.addEventListener('click', resetBackgroundColors);
-  }
+  bgInput.addEventListener('input', preview);
+  fontInput.addEventListener('input', preview);
+
+  saveButton?.addEventListener('click', () => {
+    const all = getOverrides();
+    all[themeSelect.value] = { bg: bgInput.value, text: fontInput.value };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    setThemeVars(themeSelect.value, all[themeSelect.value]);
+  });
+
+  resetButton?.addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    THEME_NAMES.forEach(clearThemeVars);
+    syncPickers();
+  });
+
+  syncPickers();
 }
 
 //This is the hide function and all its saving stuffs.

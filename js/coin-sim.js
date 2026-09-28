@@ -51,9 +51,11 @@ const materials = [
 const coin = new THREE.Mesh(geometry, materials);
 scene.add(coin);
 
+const speedGauge = document.getElementById("speed-gauge");
+
 const minSpeed = 0.01;
-const maxSpeed = 0.5;
-const speedDecay = 0.97;
+const maxSpeed = 5;
+const speedDecay = 0.98;
 let spinSpeed = 0.01;
 
 let isPaused = false;
@@ -75,6 +77,8 @@ function animate() {
     if (spinSpeed > minSpeed) {
       spinSpeed = minSpeed + (spinSpeed - minSpeed) * speedDecay;
     }
+
+    speedGauge.textContent = Math.round(spinSpeed * 1000) / 1000;
   }
 
   renderer.render(scene, camera);
@@ -99,8 +103,9 @@ function onCoinClick(event) {
 
   if (spinSpeed <= (maxSpeed + 0.25)) {
     if (intersects.length > 0) {
-        spinSpeed += 0.05;
+        spinSpeed += 0.06;
         console.log('Coin clicked!');
+        console.log("Current Speed" + spinSpeed)
     }
   }
 }

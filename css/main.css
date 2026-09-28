@@ -603,13 +603,29 @@ nav .dropdown li {
 
 
 /*Coin Simulator*/
-.game-container {
+.cs-default-text {
+  font-weight:normal;
+  text-align:left;
+  font-size:20px;
+  color:var(--space-bg-text);
+  font-family: sans-serif;
+}
+
+.cs-fancy-text {
+  font-weight:normal;
+  font-style:italic;
+  font-size:20px;
+  color:var(--space-bg-text);
+  font-family:serif;
+}
+
+.cs-game-container {
   width:800px;
   height:600px;
   border-color:8px solid black;
 }
 
-.drop-zone-container {
+.cs-drop-zone-container {
   width:80%;
   height:150px;
   display:flex;
@@ -617,17 +633,17 @@ nav .dropdown li {
   justify-content:center;
 }
 
-.drop-zone {
+.cs-drop-zone {
   width:250px;
   height:80px;
   border:2px solid black;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:black;
+  color:var(--space-bg-text);
   margin:10px;
 }
 
-.drop-zone.dragover {
+.cs-drop-zone.dragover {
   background:lightgrey;
 }

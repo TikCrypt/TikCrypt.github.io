@@ -100,6 +100,15 @@
           Uluru or Ayers Rock is a large sandstone monolith found in Australia.
         </a>
       </div>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <a class="artefact-text" style="font-weight:bold;">Dev Notes:</a><br>
+      <a class="artefact-text">- You can pause the slideshow with spacebar.</a>
+      <a class="artefact-text">- You can left click to skip to the next slide.</a>
+      <a class="artefact-text">- Enjoy!</a>
     </div>
 
     <script>
@@ -110,18 +119,24 @@
     "Earth, the 3rd planet from the sun and the planet in which we live.",
     "Mars, the 4th planet from the sun and a potential planet for human colonisation."
     ];
-    const img = document.getElementById("bg-slideshow")
+    const img = document.getElementById("bg-slideshow");
+    const caption = document.getElementById("bg-slideshow-text");
     let index = 0;
     let slideshowInterval;
     let isPaused = false;
 
+    function showSlide() {
+      img.src = images[index];
+      caption.textContent = captions[index];
+    }
+
     function nextSlide() {
       index = (index + 1) % images.length;
-      document.getElementById("bg-slideshow").src = images[index];
-      document.getElementById("bg-slideshow-text").textContent = captions[index];
+      showSlide();
     }
 
     function startSlideshow() {
+      clearInterval(slideshowInterval);
       slideshowInterval = setInterval(nextSlide, 5000);
     }
 
@@ -137,9 +152,22 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const img = document.getElementById("slideshow");
-
       startSlideshow();
+
+      img.addEventListener("click", () => {
+        nextSlide();
+        if (!isPaused) startSlideshow();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code !== "Space") return;
+
+        const tag = e.target.tagName;
+        if (["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(tag) || e.target.isContentEditable) return;
+
+        e.preventDefault();
+        toggleSlideshow();
+      });
     });
     </script>
   </div>
