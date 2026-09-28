@@ -1,3 +1,65 @@
+//To change the background colour
+function getSavedColors() {
+  try {
+    return JSON.parse(localStorage.getItem('pageColors')) || {};
+  } catch {
+    return {};
+  }
+}
+
+function getCurrentPageName() {
+  const name = location.pathname.split('/').pop();
+  return name || 'index.html';
+}
+
+function applyBackgroundColor(color) {
+  document.documentElement.style.backgroundColor = color;
+  document.body.style.backgroundColor = color;
+}
+
+const pageColors = getSavedColors();
+const currentColor = pageColors[getCurrentPageName()];
+if (currentColor) applyBackgroundColor(currentColor);
+
+const pageSelect = document.getElementById('bg-page-selector');
+const colorInput = document.getElementById('bg-color-selector');
+const saveButton = document.getElementById('s-save-button');
+
+const resetButton = document.getElementById('s-reset-button');
+
+if (pageSelect && colorInput && saveButton) {
+  function syncPickerToPage() {
+    const saved = getSavedColors()[pageSelect.value];
+    colorInput.value = saved || '#000000';
+  }
+
+  function resetBackgroundColors() {
+    localStorage.removeItem('pageColors');
+
+    document.documentElement.style.backgroundColor = '';
+    document.body.style.backgroundColor = '';
+
+    syncPickerToPage();
+  }
+
+  pageSelect.addEventListener('change', syncPickerToPage);
+  syncPickerToPage();
+
+  saveButton.addEventListener('click', () => {
+    const colors = getSavedColors();
+    colors[pageSelect.value] = colorInput.value;
+    localStorage.setItem('pageColors', JSON.stringify(colors));
+
+    if (pageSelect.value === getCurrentPageName()) {
+      applyBackgroundColor(colorInput.value);
+    }
+  });
+
+  if (resetButton) {
+    resetButton.addEventListener('click', resetBackgroundColors);
+  }
+}
+
 //This is the hide function and all its saving stuffs.
 (function () {
   const ACTIVE_KEY = 'hideEffectActive';

@@ -25,6 +25,8 @@ const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
 const topTexture = textureLoader.load('/media/logo.png');
 const bottomTexture = textureLoader.load('/media/moon.png');
 
+scene.background = "black";
+
 function fitBackgroundCover(texture, canvasWidth, canvasHeight) {
   const imageAspect = texture.image.width / texture.image.height;
   const canvasAspect = canvasWidth / canvasHeight;
@@ -39,11 +41,6 @@ function fitBackgroundCover(texture, canvasWidth, canvasHeight) {
     texture.offset.set((1 - scale) / 2, 0);
   }
 }
-
-textureLoader.load('/media/earth-bg.png', (texture) => {
-  fitBackgroundCover(texture, width, height);
-  scene.background = texture;
-});
 
 const materials = [
   sideMaterial,
@@ -122,5 +119,86 @@ function onCoinHover(event) {
 
   renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
 }
+
+function loadDroppedImage(file, onLoaded) {
+  const url = URL.createObjectURL(file);
+
+  textureLoader.load(url, (texture) => {
+    onLoaded(texture);
+    URL.revokeObjectURL(url);
+  });
+}
+
+function applyImageToCoin(file, materialIndex) {
+  loadDroppedImage(file, (texture) => {
+    const material = coin.material[materialIndex];
+    if (material.map) material.map.dispose();
+    material.map = texture;
+    material.needsUpdate = true;
+  });
+}
+
+function applyImageToBackground(file) {
+  loadDroppedImage(file, (texture) => {
+    if (scene.background && scene.background.isTexture) {
+      scene.background.dispose();
+    }
+    fitBackgroundCover(texture, width, height);
+    scene.background = texture;
+  });
+}
+
+function setupDropZone(zoneId, onFile) {
+  const zone = document.getElementById(zoneId);
+
+  function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    onFile(file);
+  }
+
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+
+  zone.addEventListener('dragleave', () => {
+    zone.classList.remove('dragover');
+  });
+
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    handleFile(e.dataTransfer.files[0]);
+  });
+  
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.hidden = true;
+  zone.appendChild(input);
+
+  zone.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', () => {
+    handleFile(input.files[0]);
+    input.value = '';
+  });
+
+  zone.tabIndex = 0;
+  zone.setAttribute('role', 'button');
+  zone.addEventListener('keydown', (e) => {
+    if (e.code === 'Enter' || e.code === 'Space') {
+      e.preventDefault();
+      input.click();
+    }
+  });
+}
+
+setupDropZone('drop-top', (file) => applyImageToCoin(file, 1));
+setupDropZone('drop-bottom', (file) => applyImageToCoin(file, 2));
+setupDropZone('drop-bg', applyImageToBackground);
+
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => e.preventDefault());
 
 renderer.domElement.addEventListener('mousemove', onCoinHover);

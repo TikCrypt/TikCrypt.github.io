@@ -13,7 +13,7 @@
     
 </head>
 
-<body class = "body">
+<body class = "body" style="background-color:var(--space-bg)">
   <nav id="nav-bar">
     <ul>
       <li class="nav-logo"><a href="/index.html"><img src="/media/logo.png" alt="logo"></a></li>
@@ -53,18 +53,19 @@
     <img src="/media/mars-bg.png" alt="mars-background">
   </div>
 
-  <div class="main-container" style="background: var(--main-bg); text-align:center; display:flex; align-items:center; flex-direction:column;">
+  <div class="main-container" style="text-align:center; display:flex; align-items:center; flex-direction:column;">
     <br>
     <br>
-    <h2 class="fancy-text" style="font-size:50px; font-weight:bold;">- Coin Simulator -</h2>
+    <h2 class="fancy-text" style="font-size:50px; font-weight:bold; color:var(--space-bg-text)">- Coin Simulator -</h2>
     <br>
     <div class="aligninator">
-      <a class="fancy-text">
+      <a class="fancy-text" style="color:var(--space-bg-text)">
       "Why use a real coin when you can use a completely useless virtual coin instead?"
       </a>
       <br>
       <br>
-      <a class="default-text">
+      <br>
+      <a class="default-text" style="color:var(--space-bg-text)">
       Coin simulator allows you to do just that! You can now play with a useless coin that serves no function at all! Spin to your heart's content!
       </a>
       <br>
@@ -72,6 +73,16 @@
       <br>
     </div>
     <div class="game-container" id="coin-game-container"></div>
+
+    <br>
+    <br>
+    <br>
+
+    <div class="drop-zone-container">
+      <div class="drop-zone" id="drop-top" style="color:var(--space-bg-text);">Drop or click heads image</div>
+      <div class="drop-zone" id="drop-bottom" style="color:var(--space-bg-text)">Drop or click tails image</div>
+      <div class="drop-zone" id="drop-bg" style="color:var(--space-bg-text)">Drop or click background iamge</div>
+    </div>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
@@ -81,6 +92,7 @@
     </script>
 
     <script src="/js/coin-sim.js" defer></script>
+
   </div>
 
   <br>
@@ -90,6 +102,6 @@
 </body>
 
 <footer class="main-footer">
-  <a class="main-footer-text">© Tik Tjin Toh</a>
+  <a class="main-footer-text" style="color:var(--space-bg-text);">© Tik Tjin Toh</a>
 </footer>
 </html>

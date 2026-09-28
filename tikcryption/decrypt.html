@@ -12,7 +12,7 @@
     
 </head>
 
-<body class = "body">
+<body class = "tc-body">
   <nav id="nav-bar">
     <ul>
       <li class="nav-logo"><a href="/index.html"><img src="/media/logo.png" alt="logo"></a></li>
@@ -48,9 +48,15 @@
     </ul>
   </nav>
 
+  <div class="title-container">
+    <img src="/media/deeper-underground-bg.png" alt="underground-background">
+  </div>
+
   <div class="tc-container">
     <br>
-    <h2 class="fancy-text" style="font-size:30px; margin-left:30px;">Decryption Services</h2><br>
+    <br>
+    <h2 class="tc-fancy-text" style="font-size:50px; font-weight:bold; text-align:center;">- Decryption -</h2>
+    <br>
     <a class="tc-default-text" style="margin-left:30px;">1 - Input text into the textarea below.</a><br>
     <a class="tc-default-text" style="margin-left:30px;">2 - Click the decrypt button to decrypt your message.</a><br>
     <br>
@@ -59,10 +65,13 @@
     <textarea id="decrypt-input" class="tc-auto-expand" rows="6" oninput="autoExpand(this)" style="margin-left:30px;">Enter stuff here...</textarea>
     <br>
     <div class="tc-decrypt-container" style="margin-left:30px;">
-      <button class="tc-decrypt-button" onclick="decryptionFunction()"><a>Decrypt</a></button>
-      <button class="tc-decrypt-button" onclick="copyText('decrypt-input')"><a>Copy</a></button>
+      <button class="tc-decrypt-button" onclick="decryptionFunction()"><a class="tc-button-text">Decrypt</a></button>
+      <button class="tc-decrypt-button" onclick="copyText('decrypt-input')"><a class="tc-button-text">Copy</a></button>
     </div>
-    <h2 class="fancy-text" style="font-size:23px; font-weight:bold; margin-left:30px;"> Your Key: </h2> <br>
+    <br>
+    <br>
+    <br>
+    <h2 class="tc-fancy-text" style="font-size:23px; font-weight:bold; margin-left:30px;"> Your Key: </h2> <br>
     <input id="key-input" class="long-key" type="text" placeholder="Key holder" style="margin-left:30px;">
   </div>
 
@@ -72,8 +81,8 @@
   
 </body>
 
-<footer class="main-footer">
-  <a class="main-footer-text">© Tik Tjin Toh</a>
+<footer class="tc-footer">
+  <a class="tc-footer-text">© Tik Tjin Toh</a>
 </footer>
 
 </html>
