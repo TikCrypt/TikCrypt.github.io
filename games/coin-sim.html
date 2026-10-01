@@ -33,7 +33,7 @@
       </li>
       <li><a href="/games/coin-sim.html" class="nav-text">Games</a>
         <ul class="dropdown">
-          <li><a href="/games/coin-sim.html">Coin Simulator</a></li>
+          <li><a href="/games/coin-sim.html">Coin Sim</a></li>
           <li><a href="/games/cibophobia/cibophobia.html">Cibophobia</a></li>
         </ul>
       </li>
@@ -50,52 +50,23 @@
     </ul>
   </nav>
 
-  <div class="title-container">
-    <img src="/media/mars-bg.png" alt="mars-background">
-  </div>
-
-  <div class="main-container" style="text-align:center; display:flex; align-items:center; flex-direction:column;">
-    <br>
-    <br>
-    <h2 class="cs-fancy-text" style="font-size:50px; font-weight:bold;">- Coin Simulator -</h2>
-    <br>
-    <div class="aligninator">
-      <a class="cs-fancy-text">
-      "Why use a real coin when you can use a completely useless virtual coin instead?"
-      </a>
-      <br>
-      <br>
-      <br>
-      <a class="cs-default-text">
-      Coin simulator allows you to do just that! You can now play with a useless coin that serves no function at all! Spin to your heart's content!
-      </a>
-      <br>
-      <br>
-      <br>
-      <a class="cs-default-text" style="font-weight:bold;">Dev Notes:</a>
-      <br>
-      <a class="cs-default-text">- You can pause the coin with spacebar.</a><br>
-      <a class="cs-default-text">- You can spin it by left clicking the coin.</a><br>
-      <a class="cs-default-text">- You can edit the faces and background of the coin.</a>
-      <br>
-      <br>
-      <br>
-    </div>
-    <div class="cs-game-container" id="coin-game-container"></div>
-
-    <br>
-    <br>
-    <br>
-    <a class="cs-default-text" style="font-weight:bold;">Current Speed:</a><br>
-    <a class="cs-default-text" id="speed-gauge">0.01</a>
-    <br>
+  <div class="main-container" style="display:relative; margin-left:20px;">
+    <h2 class="cs-fancy-text" style="font-size:50px; font-weight:bold;">Coin Simulator</h2>
+    <a class="cs-fancy-text">
+    "Why use a real coin when you can use a completely useless virtual coin instead?"
+    </a><br>
     <br>
     <br>
 
-    <div class="cs-drop-zone-container">
-      <div class="cs-drop-zone" id="drop-top">Drop or click heads image</div>
-      <div class="cs-drop-zone" id="drop-bottom">Drop or click tails image</div>
-      <div class="cs-drop-zone" id="drop-bg">Drop or click background iamge</div>
+    <div class="columns" style="border:5px solid var(--space-bg-text); width:95%;">
+      <div style="flex:1; min-width:0; height:451px;">
+        <div class="cs-game-container" id="coin-game-container"></div>
+      </div>
+
+      <div style="flex:none; width:300px; height:451px; justify-content:center; border-left:5px solid var(--space-bg-text);">
+        <a class="cs-default-text">Spacebar = Pause/Unpause</a><br>
+        <a class="cs-default-text">Left Click = Spin</a>
+      </div>
     </div>
 
     <script
@@ -115,7 +86,7 @@
 
 </body>
 
-<footer class="main-footer">
-  <a class="main-footer-text" style="color:var(--space-bg-text);">© Tik Tjin Toh</a>
+<footer class="cs-footer">
+  <a class="cs-footer-text">© Tik Tjin Toh</a>
 </footer>
 </html>

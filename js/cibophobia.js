@@ -1,5 +1,5 @@
 const gameContainer = document.querySelector('.cp-game-container');
-const LEVEL_COUNT = 1;
+const LEVEL_COUNT = 2;
 const DIFFICULTIES = {
   easy: { label: 'Easy', lives: 5 },
   medium: { label: 'Medium', lives: 3 },
@@ -14,17 +14,38 @@ const LEVELS = {
     maxFish: 2,
     fishLastSeconds: 10,
     story: [
-      'Cibophobia, the fear of food.',
+      "Has an owner's incompetence ever killed a pet?",
+      "Has Cibophobia ever killed?",
+      "Best not find out...",
     ],
     messages: [
       { at: 1, text: 'The worms approach!' },
-      { at: 15, text: 'The fish descend upon us too!' },
+      { at: 15, text: 'The fish descend too!' },
+    ],
+  },
+  2: {
+    duration: 40,
+    maxWorms: 8,
+    maxFish: 3,
+    fishLastSeconds: 25,
+    speedMult: 1.15,
+    shooting: true,
+    boss: true,
+    playerSrc: 'media/crab-cannon.png',
+    story: [
+      'A voice whispers from the Beyond,',
+      '"You shall have your revenge..."',
+    ],
+    messages: [
+      { at: 1, text: 'Press space to fire!' },
+      { at: 15, text: 'It turns out coconuts are pretty effective bullets.' },
     ],
   },
   endless: {
     endless: true,
     story: [
-      'Endure the infinite.',
+      "Wait this isn't canonical?",
+      "Why is this message even here?",
     ],
     messages: [
       { at: 1, text: 'Goal: Survive.' },
@@ -82,10 +103,6 @@ function showLevelSelect() {
     gap: 2rem;
   `;
 
-  const title = document.createElement('h1');
-  title.textContent = 'Cibophobia';
-  title.style.margin = '0';
-
   const difficultyRow = document.createElement('div');
   difficultyRow.className = 'cp-difficulty';
   difficultyRow.style.cssText = 'display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;';
@@ -103,7 +120,6 @@ function showLevelSelect() {
     const button = document.createElement('button');
     button.className = 'cp-difficulty-button cp-bubble';
     button.textContent = `${difficulty.label}\n${difficulty.lives} ${difficulty.lives === 1 ? 'life' : 'lives'}`;
-    button.style.animationDelay = `${-Math.random() * 3}s`;
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       selectedDifficulty = key;
@@ -130,7 +146,6 @@ function showLevelSelect() {
     const button = document.createElement('button');
     button.textContent = level === 'endless' ? 'Endless' : `Level ${level}`;
     button.className = 'cp-level-button cp-bubble cp-bubble-large';
-    button.style.animationDelay = `${-Math.random() * 3}s`;
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       startLevel(level);
@@ -138,12 +153,12 @@ function showLevelSelect() {
     buttons.appendChild(button);
   }
 
-  screen.append(title, difficultyRow, buttons);
+  screen.append(difficultyRow, buttons);
   gameContainer.appendChild(screen);
 }
 
 const GRID_COLS = 10;
-const GRID_ROWS = 10;
+const GRID_ROWS = 5;
 const TILE_PATH = 'tiles/';
 const TILE_EXT = '.png';
 const TILE_NAMES = ['sand-1', 'sand-2', 'sand-3', 'sand-4'];
@@ -153,7 +168,7 @@ function tileSrc(name) {
   return `${TILE_PATH}${name}${TILE_EXT}`;
 }
 
-function buildGrid() {
+function buildGrid(playerSrc = PLAYER_SRC) {
   const grid = document.createElement('div');
   grid.className = 'cp-grid';
   grid.style.cssText = `
@@ -182,7 +197,7 @@ function buildGrid() {
       grid.appendChild(tile);
     }
   }
-  createPlayer(grid);
+  createPlayer(grid, playerSrc);
   return grid;
 }
 
@@ -197,13 +212,13 @@ function placePlayer() {
   playerEl.style.top = `${(playerRow * 100) / GRID_ROWS}%`;
 }
 
-function createPlayer(grid) {
+function createPlayer(grid, src = PLAYER_SRC) {
   playerRow = GRID_ROWS - 1;
   playerCol = Math.floor(GRID_COLS / 2);
 
   playerEl = document.createElement('img');
   playerEl.className = 'cp-player';
-  playerEl.src = PLAYER_SRC;
+  playerEl.src = src;
   playerEl.alt = 'Player';
   playerEl.draggable = false;
   playerEl.style.cssText = `
@@ -263,8 +278,6 @@ function startLevel(level) {
     justify-content: center;
     gap: 1.5rem;
     text-align: center;
-    color: black;
-    font-family: 'Courier New', monospace;
   `;
 
   const title = document.createElement('h1');
@@ -320,17 +333,46 @@ function beginLevel(level) {
   livesEl.className = 'cp-lives';
   livesEl.textContent = `Lives: ${startingLives}`;
 
-  hud.append(timer, livesEl);
+  const scoreEl = document.createElement('div');
+  scoreEl.className = 'cp-score';
+  scoreEl.textContent = 'Score: 0';
+  scoreDisplay = scoreEl;
 
-  const grid = buildGrid();
+  hud.append(scoreEl, timer, livesEl);
+
+  bossBar = null;
+  if (LEVELS[level].boss) {
+    const bar = document.createElement('div');
+    bar.className = 'cp-boss-bar';
+    bar.style.cssText = `
+      display: none;
+      align-self: center;
+      width: 12rem;
+      height: 1.2rem;
+      box-sizing: border-box;
+      border: 3px solid #7a5628;
+      border-radius: 6px;
+      background: #f3e3bd;
+      overflow: hidden;
+    `;
+    const fill = document.createElement('div');
+    fill.style.cssText = 'width: 100%; height: 100%; background: #b8341f; transition: width 0.1s;';
+    bar.appendChild(fill);
+    hud.appendChild(bar);
+    bossBar = { bar, fill };
+  }
+
+  const grid = buildGrid(LEVELS[level].playerSrc || PLAYER_SRC);
   gameContainer.append(hud, grid);
   startGame(grid, timer, livesEl, startingLives, LEVELS[level]);
 }
 
 const FALLERS = {
-  fish: { src: 'media/fish.png', speed: 0.7, sideways: true },
-  worm: { src: 'media/worm.gif', speed: 0.7, sideways: false },
+  fish: { src: 'media/fish.png', speed: 0.7, sideways: true, hp: 3, points: 25, dodgePoints: 0 },
+  worm: { src: 'media/worm.gif', speed: 0.7, sideways: false, hp: 2, points: 10, dodgePoints: 0 },
 };
+const BOSS_HIT_POINTS = 5;
+const BOSS_KILL_POINTS = 500;
 const SPAWN_MIN = 0.4;
 const SPAWN_MAX = 2;
 const SHIFT_MIN = 1.5;
@@ -423,7 +465,7 @@ function getParams(t) {
     maxFish: t >= currentLevel.duration - currentLevel.fishLastSeconds ? currentLevel.maxFish : 0,
     spawnMin: SPAWN_MIN,
     spawnMax: SPAWN_MAX,
-    speedMult: 1,
+    speedMult: currentLevel.speedMult || 1,
   };
 }
 
@@ -446,6 +488,10 @@ function spawnFaller(grid) {
   );
   if (freeColumns.length === 0) return;
   const col = freeColumns[Math.floor(Math.random() * freeColumns.length)];
+  createFaller(grid, type, col, -1, params.speedMult);
+}
+
+function createFaller(grid, type, col, row, speedMult) {
   const config = FALLERS[type];
 
   const el = document.createElement('img');
@@ -467,8 +513,11 @@ function spawnFaller(grid) {
     el,
     type,
     col,
-    row: -1,
-    speed: config.speed * params.speedMult,
+    row,
+    hp: config.hp,
+    points: config.points,
+    dodgePoints: config.dodgePoints,
+    speed: config.speed * speedMult,
     sideways: config.sideways,
     nextShift: randomBetween(SHIFT_MIN, SHIFT_MAX),
     pendingDir: 0,
@@ -478,6 +527,7 @@ function spawnFaller(grid) {
   placeFaller(faller);
   grid.appendChild(el);
   fallers.push(faller);
+  return faller;
 }
 
 function updateSpawners(grid, dt) {
@@ -513,6 +563,7 @@ function updateFallers(dt) {
     }
 
     if (faller.row >= GRID_ROWS) {
+      addScore(faller.dodgePoints);
       removeFaller(faller);
       continue;
     }
@@ -527,9 +578,424 @@ function updateFallers(dt) {
   }
 }
 
+const PROJECTILE_SPEED = 11;
+const FIRE_COOLDOWN = 300;
+
+let projectiles = [];
+let lastShot = 0;
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function flashHit(el) {
+  el.style.filter = 'brightness(2)';
+  setTimeout(() => {
+    el.style.filter = '';
+  }, 80);
+}
+
+function placeProjectile(projectile) {
+  projectile.el.style.left = `${((projectile.col + 0.4) * 100) / GRID_COLS}%`;
+  projectile.el.style.top = `${(projectile.row * 100) / GRID_ROWS}%`;
+}
+
+function removeProjectile(projectile) {
+  projectile.el.remove();
+  projectiles = projectiles.filter((p) => p !== projectile);
+}
+
+function fireProjectile() {
+  if (!gameRunning || !playerEl || !currentLevel.shooting) return;
+
+  const now = performance.now();
+  if (now - lastShot < FIRE_COOLDOWN) return;
+  lastShot = now;
+
+  const el = document.createElement('div');
+  el.className = 'cp-projectile';
+  el.style.cssText = `
+    position: absolute;
+    width: ${20 / GRID_COLS}%;
+    height: ${40 / GRID_ROWS}%;
+    box-sizing: border-box;
+    background: #3b2a14;
+    border: 2px solid #fff6e0;
+    border-radius: 40%;
+    pointer-events: none;
+    z-index: 2;
+  `;
+
+  const startRow = playerRow - 0.4;
+  const projectile = { el, col: playerCol, row: startRow, prevRow: startRow };
+  placeProjectile(projectile);
+  playerEl.parentNode.appendChild(el);
+  projectiles.push(projectile);
+}
+
+function damageFaller(faller) {
+  faller.hp -= 1;
+  flashHit(faller.el);
+  if (faller.hp <= 0) {
+    addScore(faller.points);
+    removeFaller(faller);
+  }
+}
+
+function updateProjectiles(dt) {
+  for (const projectile of [...projectiles]) {
+    projectile.prevRow = projectile.row;
+    projectile.row -= PROJECTILE_SPEED * dt;
+
+    if (projectile.row < -0.5) {
+      removeProjectile(projectile);
+      continue;
+    }
+
+    const target = fallers.find(
+      (f) =>
+        f.col === projectile.col &&
+        f.row < projectile.prevRow + 0.4 &&
+        f.row + 1 > projectile.row
+    );
+    if (target) {
+      removeProjectile(projectile);
+      damageFaller(target);
+      continue;
+    }
+
+    if (
+      boss &&
+      boss.phase !== 'enter' &&
+      boss.phase !== 'dead' &&
+      projectile.col + 0.6 > boss.x &&
+      projectile.col + 0.4 < boss.x + BOSS_W &&
+      boss.row < projectile.prevRow + 0.4 &&
+      boss.row + BOSS_H > projectile.row
+    ) {
+      removeProjectile(projectile);
+      damageBoss();
+      if (!gameRunning) return;
+      continue;
+    }
+
+    placeProjectile(projectile);
+  }
+}
+
+// ---------- Boss ----------
+const BOSS_SRC = 'media/fish.png';
+const BOSS_W = 3;
+const BOSS_H = 3;
+const BOSS_HP = 40;
+const BOSS_ENTER_SPEED = 1.5;
+const BOSS_SWAY_SPEED = 0.8;
+const BOSS_SLIDE_SPEED = 8;
+const BOSS_TELEGRAPH = 1.8;
+const BOSS_LOCK_TIME = 0.8;
+const BOSS_CHARGE_SPEED = 9;
+const BOSS_RETURN_SPEED = 2.5;
+const BOSS_CONTACT_COOLDOWN = 1.2;
+
+let boss = null;
+let bossBar = null;
+
+function placeBoss() {
+  boss.el.style.left = `${(boss.x * 100) / GRID_COLS}%`;
+  boss.el.style.top = `${(boss.row * 100) / GRID_ROWS}%`;
+}
+
+function startBoss(grid) {
+  const el = document.createElement('img');
+  el.className = 'cp-boss';
+  el.src = BOSS_SRC;
+  el.alt = 'Boss';
+  el.draggable = false;
+  el.style.cssText = `
+    position: absolute;
+    width: ${(BOSS_W * 100) / GRID_COLS}%;
+    height: ${(BOSS_H * 100) / GRID_ROWS}%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+  `;
+
+  boss = {
+    el,
+    x: (GRID_COLS - BOSS_W) / 2,
+    row: -BOSS_H,
+    hp: BOSS_HP,
+    maxHp: BOSS_HP,
+    phase: 'enter',
+    phaseTimer: 0,
+    chargeTimer: 0,
+    waveTimer: 0,
+    swayT: 0,
+    lockX: null,
+    warnEl: null,
+    contactCooldown: 0,
+  };
+
+  placeBoss();
+  grid.appendChild(el);
+
+  if (bossBar) {
+    bossBar.bar.style.display = 'block';
+    bossBar.fill.style.width = '100%';
+  }
+  showMessage('Something huge approaches!');
+}
+
+function showBossWarning(grid) {
+  const warn = document.createElement('div');
+  warn.className = 'cp-boss-warning';
+  warn.style.cssText = `
+    position: absolute;
+    top: 0;
+    height: 100%;
+    left: ${(boss.lockX * 100) / GRID_COLS}%;
+    width: ${(BOSS_W * 100) / GRID_COLS}%;
+    box-sizing: border-box;
+    background: rgba(200, 40, 20, 0.22);
+    border-left: 3px solid rgba(200, 40, 20, 0.7);
+    border-right: 3px solid rgba(200, 40, 20, 0.7);
+    pointer-events: none;
+    z-index: 0;
+    animation: cp-warn-flash 0.2s steps(2) infinite alternate;
+  `;
+  grid.appendChild(warn);
+  boss.warnEl = warn;
+}
+
+function clearBossWarning() {
+  if (boss && boss.warnEl) {
+    boss.warnEl.remove();
+    boss.warnEl = null;
+  }
+}
+
+function slideBoss(targetX, dt) {
+  const step = BOSS_SLIDE_SPEED * dt;
+  boss.x += clamp(targetX - boss.x, -step, step);
+}
+
+function spawnFishWave(grid) {
+  const fishCount = fallers.filter((f) => f.type === 'fish').length;
+  if (fishCount >= 6) return;
+
+  const rage = boss.hp / boss.maxHp;
+  const count = 3 + (rage < 0.5 ? 1 : 0) + (rage < 0.25 ? 1 : 0);
+  const columns = Array.from({ length: GRID_COLS }, (_, i) => i).sort(() => Math.random() - 0.5);
+
+  for (const col of columns.slice(0, count)) {
+    createFaller(grid, 'fish', col, -1, 1.3);
+  }
+}
+
+function bossTouchesPlayer() {
+  return (
+    playerCol + 1 > boss.x + 0.2 &&
+    playerCol < boss.x + BOSS_W - 0.2 &&
+    playerRow + 1 > boss.row + 0.2 &&
+    playerRow < boss.row + BOSS_H - 0.2
+  );
+}
+
+function damageBoss() {
+  boss.hp -= 1;
+  addScore(BOSS_HIT_POINTS);
+  flashHit(boss.el);
+  if (bossBar) bossBar.fill.style.width = `${Math.max(0, (boss.hp / boss.maxHp) * 100)}%`;
+
+  if (boss.hp <= 0) {
+    boss.phase = 'dead';
+    clearBossWarning();
+    addScore(BOSS_KILL_POINTS);
+    finishLevel();
+  }
+}
+
+function updateBoss(dt, grid) {
+  boss.contactCooldown = Math.max(0, boss.contactCooldown - dt);
+  const maxX = GRID_COLS - BOSS_W;
+  const rage = boss.hp / boss.maxHp;
+
+  if (boss.phase === 'enter') {
+    boss.row += BOSS_ENTER_SPEED * dt;
+    if (boss.row >= 0) {
+      boss.row = 0;
+      boss.phase = 'idle';
+      boss.chargeTimer = randomBetween(3, 4);
+      boss.waveTimer = 1.5;
+    }
+  } else if (boss.phase === 'idle') {
+    boss.swayT += dt * BOSS_SWAY_SPEED;
+    slideBoss((maxX / 2) * (1 + Math.sin(boss.swayT)), dt);
+
+    boss.waveTimer -= dt;
+    boss.chargeTimer -= dt;
+
+    if (boss.waveTimer <= 0) {
+      spawnFishWave(grid);
+      boss.waveTimer = randomBetween(4, 6) * (0.6 + 0.4 * rage);
+    }
+    if (boss.chargeTimer <= 0) {
+      boss.phase = 'telegraph';
+      boss.phaseTimer = BOSS_TELEGRAPH;
+      boss.lockX = null;
+    }
+  } else if (boss.phase === 'telegraph') {
+    boss.phaseTimer -= dt;
+
+    if (boss.lockX === null) {
+      // Track the player's lane, then lock on
+      slideBoss(clamp(playerCol - 1, 0, maxX), dt);
+      if (boss.phaseTimer <= BOSS_LOCK_TIME) {
+        boss.lockX = clamp(playerCol - 1, 0, maxX);
+        showBossWarning(grid);
+      }
+    } else {
+      slideBoss(boss.lockX, dt);
+      boss.el.style.translate = `${(Math.random() - 0.5) * 6}px 0`;
+    }
+
+    if (boss.lockX !== null && boss.phaseTimer <= 0 && Math.abs(boss.x - boss.lockX) < 0.05) {
+      boss.x = boss.lockX;
+      boss.el.style.translate = '';
+      clearBossWarning();
+      boss.phase = 'charge';
+    }
+  } else if (boss.phase === 'charge') {
+    boss.row += BOSS_CHARGE_SPEED * dt;
+    if (boss.row >= GRID_ROWS - BOSS_H + 0.5) boss.phase = 'return';
+  } else if (boss.phase === 'return') {
+    boss.row -= BOSS_RETURN_SPEED * dt;
+    if (boss.row <= 0) {
+      boss.row = 0;
+      boss.phase = 'idle';
+      boss.chargeTimer = randomBetween(4, 6) * (0.55 + 0.45 * rage);
+      boss.waveTimer = randomBetween(1, 2);
+    }
+  }
+
+  const dangerous = boss.phase === 'idle' || boss.phase === 'telegraph' || boss.phase === 'charge';
+  if (dangerous && boss.contactCooldown <= 0 && bossTouchesPlayer()) {
+    boss.contactCooldown = BOSS_CONTACT_COOLDOWN;
+    takeDamage();
+    if (!gameRunning) return;
+  }
+
+  placeBoss();
+}
+
 let lives = 0;
 let livesDisplay = null;
 let gameRunning = false;
+let score = 0;
+let scoreDisplay = null;
+
+function addScore(points) {
+  if (!gameRunning) return;
+  score += points;
+  if (scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
+}
+
+// ---------- Settings / pause menu ----------
+let paused = false;
+let settingsEl = null;
+let gameLoop = null;
+
+function makeMenuButton(label, onClick) {
+  const button = document.createElement('button');
+  button.textContent = label;
+  button.className = 'cp-bubble cp-bubble-large';
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onClick();
+  });
+  return button;
+}
+
+function openSettings() {
+  if (!gameRunning || paused) return;
+  paused = true;
+  cancelAnimationFrame(gameFrame);
+
+  if (getComputedStyle(gameContainer).position === 'static') {
+    gameContainer.style.position = 'relative';
+  }
+
+  settingsEl = document.createElement('div');
+  settingsEl.className = 'cp-settings';
+  settingsEl.style.cssText = `
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+  `;
+  settingsEl.addEventListener('click', (event) => event.stopPropagation());
+
+  const panel = document.createElement('div');
+  panel.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: min(300px, 80%);
+    box-sizing: border-box;
+    padding: 1.5rem;
+    background: #f3e3bd;
+    border: 3px solid #7a5628;
+    border-radius: 6px;
+    box-shadow: 0 4px 0 #7a5628;
+  `;
+
+  const heading = document.createElement('h2');
+  heading.textContent = 'Settings';
+  heading.style.margin = '0';
+
+  const hint = document.createElement('p');
+  hint.textContent = 'Press Esc to resume';
+  hint.style.cssText = 'margin: 0; opacity: 0.6; font-size: 0.85rem;';
+
+  panel.append(
+    heading,
+    makeMenuButton('Resume', closeSettings),
+    makeMenuButton('Leave Level', leaveLevel),
+    hint
+  );
+  settingsEl.appendChild(panel);
+  gameContainer.appendChild(settingsEl);
+}
+
+function closeSettings() {
+  if (!paused) return;
+  paused = false;
+  if (settingsEl) {
+    settingsEl.remove();
+    settingsEl = null;
+  }
+  gameLast = performance.now();
+  gameFrame = requestAnimationFrame(gameLoop);
+}
+
+function toggleSettings() {
+  if (paused) closeSettings();
+  else openSettings();
+}
+
+function leaveLevel() {
+  paused = false;
+  gameRunning = false;
+  levelActive = false;
+  cancelAnimationFrame(gameFrame);
+  settingsEl = null;
+  boss = null;
+  showLevelSelect();
+}
 
 function takeDamage() {
   if (!gameRunning) return;
@@ -573,12 +1039,12 @@ function showEndScreen(headingText, messageText) {
 
 function endGame() {
   if (!gameRunning) return;
-  showEndScreen('Game Over', `You survived ${formatTime(gameElapsed)}`);
+  showEndScreen('Game Over', `You survived ${formatTime(gameElapsed)} | Score: ${score}`);
 }
 
 function finishLevel() {
   if (!gameRunning) return;
-  showEndScreen('Level Complete!', `Lives left: ${lives}`);
+  showEndScreen('Level Complete!', `Lives left: ${lives} | Score: ${score}`);
 }
 
 function startGame(grid, timerEl, livesEl, startingLives, level) {
@@ -588,9 +1054,15 @@ function startGame(grid, timerEl, livesEl, startingLives, level) {
   gameElapsed = 0;
   lives = startingLives;
   livesDisplay = livesEl;
+  score = 0;
+  paused = false;
+  settingsEl = null;
   gameRunning = true;
   spawnTimer = randomBetween(0.3, 1.5);
   nextMessage = 0;
+  boss = null;
+  projectiles = [];
+  lastShot = 0;
   gameLast = performance.now();
 
   const loop = (now) => {
@@ -606,19 +1078,29 @@ function startGame(grid, timerEl, livesEl, startingLives, level) {
 
     if (currentLevel.endless) {
       timerEl.textContent = formatTime(gameElapsed);
+    } else if (boss) {
+      timerEl.textContent = 'BOSS';
     } else {
       const remaining = Math.max(currentLevel.duration - gameElapsed, 0);
       timerEl.textContent = formatTime(Math.ceil(remaining));
       if (remaining <= 0) {
-        finishLevel();
-        return;
+        if (currentLevel.boss) {
+          startBoss(grid);
+          timerEl.textContent = 'BOSS';
+        } else {
+          finishLevel();
+          return;
+        }
       }
     }
 
-    updateSpawners(grid, dt);
+    if (!boss) updateSpawners(grid, dt);
     updateFallers(dt);
+    if (gameRunning) updateProjectiles(dt);
+    if (gameRunning && boss) updateBoss(dt, grid);
     if (gameRunning) gameFrame = requestAnimationFrame(loop);
   };
+  gameLoop = loop;
   gameFrame = requestAnimationFrame(loop);
 }
 
@@ -654,64 +1136,47 @@ function injectStyles() {
   const style = document.createElement('style');
   style.id = 'cp-styles';
   style.textContent = `
+    .cp-game-container {
+      color: #3b2a14;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+    }
     .cp-bubble {
-      --cp-pixel-circle: polygon(
-        30% 0, 70% 0, 70% 10%, 85% 10%, 85% 20%, 90% 20%, 90% 30%, 100% 30%,
-        100% 70%, 90% 70%, 90% 80%, 85% 80%, 85% 90%, 70% 90%, 70% 100%, 30% 100%,
-        30% 90%, 15% 90%, 15% 80%, 10% 80%, 10% 70%, 0 70%, 0 30%, 10% 30%,
-        10% 20%, 15% 20%, 15% 10%, 30% 10%
-      );
-      position: relative;
-      isolation: isolate;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      width: 100px;
-      height: 100px;
-      padding: 0.5rem;
-      border: none;
-      border-radius: 0;
-      background: #0b3a5b;
-      clip-path: var(--cp-pixel-circle);
-      color: #0b3a5b;
-      font: 700 0.8rem/1.25 'Courier New', monospace;
+      min-width: 100px;
+      padding: 0.6rem 1.1rem;
+      background: #d9b779;
+      border: 3px solid #7a5628;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 #7a5628;
+      color: #3b2a14;
+      font: 700 0.9rem/1.25 'Courier New', monospace;
       text-align: center;
       white-space: pre-line;
       cursor: pointer;
-      animation: cp-bob 1.6s steps(4, end) infinite alternate;
-    }
-    .cp-bubble::before {
-      content: '';
-      position: absolute;
-      inset: 8%;
-      z-index: -1;
-      background:
-        linear-gradient(#fff, #fff) 20% 18% / 16% 6% no-repeat,
-        linear-gradient(#fff, #fff) 20% 18% / 6% 16% no-repeat,
-        #7ccbff;
-      clip-path: var(--cp-pixel-circle);
+      transition: background 0.1s, translate 0.05s, box-shadow 0.05s;
     }
     .cp-bubble-large {
-      width: 130px;
-      height: 130px;
-      font-size: 1rem;
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 0.8rem 1.2rem;
     }
     .cp-bubble:hover {
-      filter: brightness(1.12);
+      background: #e6c98f;
     }
     .cp-bubble:active {
-      scale: 0.92;
+      translate: 0 3px;
+      box-shadow: 0 1px 0 #7a5628;
     }
-    .cp-bubble-selected::before {
-      background:
-        linear-gradient(#fff, #fff) 20% 18% / 16% 6% no-repeat,
-        linear-gradient(#fff, #fff) 20% 18% / 6% 16% no-repeat,
-        #ffe27a;
+    .cp-bubble-selected {
+      background: #b8822f;
+      color: #fff6e0;
     }
-    @keyframes cp-bob {
-      from { translate: 0 -6px; }
-      to { translate: 0 6px; }
+    .cp-bubble-selected:hover {
+      background: #c48c36;
     }
     .cp-message {
       position: fixed;
@@ -720,9 +1185,11 @@ function injectStyles() {
       z-index: 10;
       max-width: min(420px, 60vw);
       padding: 0.6rem 0.9rem;
-      background: rgba(11, 58, 91, 0.9);
-      border: 3px solid #fff;
-      color: #fff;
+      background: #d9b779;
+      border: 3px solid #7a5628;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 #7a5628;
+      color: #3b2a14;
       font: 700 1rem/1.3 'Courier New', monospace;
       pointer-events: none;
       opacity: 0;
@@ -736,8 +1203,9 @@ function injectStyles() {
       90% { opacity: 1; }
       100% { opacity: 0; }
     }
-    @media (prefers-reduced-motion: reduce) {
-      .cp-bubble { animation: none; }
+    @keyframes cp-warn-flash {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
     }
   `;
   document.head.appendChild(style);
@@ -747,9 +1215,22 @@ injectStyles();
 showPlayButton();
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') endIntro();
+  if (event.key === 'Escape') {
+    endIntro();
+    if (levelActive && gameRunning) toggleSettings();
+    return;
+  }
 
-  if (!levelActive) return;
+  if (!levelActive || paused) return;
+
+  if (event.code === 'Space') {
+    if (currentLevel.shooting) {
+      event.preventDefault();
+      fireProjectile();
+    }
+    return;
+  }
+
   const move = MOVE_KEYS[event.key.toLowerCase()];
   if (!move) return;
   event.preventDefault();

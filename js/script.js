@@ -1,92 +1,37 @@
-//To change the background and font colours
-const STORAGE_KEY = 'themeOverrides';
-const THEME_NAMES = ['space', 'desert', 'water', 'underground'];
+//Light mode/Dark mode switcher.
+const THEMES = ['space', 'underground', 'water', 'desert'];
+const SWAP_KEY = 'coloursSwapped';
+const RELATIVE_BLACK = '#111111';
 const root = document.documentElement;
 
-function toHex(color) {
-  const ctx = document.createElement('canvas').getContext('2d');
-  ctx.fillStyle = '#000000';
-  ctx.fillStyle = color.trim();
-  return ctx.fillStyle;
-}
-
-function getOverrides() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function setThemeVars(theme, { bg, text }) {
-  root.style.setProperty(`--${theme}-bg`, bg);
-  root.style.setProperty(`--${theme}-bg-text`, text);
-}
-
-function clearThemeVars(theme) {
-  root.style.removeProperty(`--${theme}-bg`);
-  root.style.removeProperty(`--${theme}-bg-text`);
-}
-
-const defaults = {};
-const cs = getComputedStyle(root);
-THEME_NAMES.forEach(theme => {
-  defaults[theme] = {
-    bg: toHex(cs.getPropertyValue(`--${theme}-bg`)),
-    text: toHex(cs.getPropertyValue(`--${theme}-bg-text`))
-  };
+function setSwapped(on) {
+  THEMES.forEach(t => {
+  root.style.removeProperty(`--${t}-bg`);
+  root.style.removeProperty(`--${t}-bg-text`);
 });
+root.style.removeProperty('--main-color');
+root.style.removeProperty('--main-text-color');
 
-const overrides = getOverrides();
-THEME_NAMES.forEach(theme => {
-  if (overrides[theme]) setThemeVars(theme, overrides[theme]);
-});
-
-const themeSelect = document.getElementById('bg-page-selector');
-const bgInput     = document.getElementById('bg-color-selector');
-const fontInput   = document.getElementById('font-color-selector');
-const saveButton  = document.getElementById('s-save-button');
-const resetButton = document.getElementById('s-reset-button');
-
-if (themeSelect && bgInput && fontInput) {
-  function syncPickers() {
-    const theme = themeSelect.value;
-    const current = getOverrides()[theme] || defaults[theme];
-    bgInput.value = current.bg;
-    fontInput.value = current.text;
-  }
-
-  function preview() {
-    setThemeVars(themeSelect.value, { bg: bgInput.value, text: fontInput.value });
-  }
-
-  let previousTheme = themeSelect.value;
-  themeSelect.addEventListener('change', () => {
-    const saved = getOverrides()[previousTheme];
-    if (saved) setThemeVars(previousTheme, saved);
-    else clearThemeVars(previousTheme);
-    previousTheme = themeSelect.value;
-    syncPickers();
+if (on) {
+  const cs = getComputedStyle(root);
+  THEMES.forEach(t => {
+    const bg = cs.getPropertyValue(`--${t}-bg`).trim();
+    const text = cs.getPropertyValue(`--${t}-bg-text`).trim();
+    root.style.setProperty(`--${t}-bg`, text);
+    root.style.setProperty(`--${t}-bg-text`, bg);
   });
-
-  bgInput.addEventListener('input', preview);
-  fontInput.addEventListener('input', preview);
-
-  saveButton?.addEventListener('click', () => {
-    const all = getOverrides();
-    all[themeSelect.value] = { bg: bgInput.value, text: fontInput.value };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    setThemeVars(themeSelect.value, all[themeSelect.value]);
-  });
-
-  resetButton?.addEventListener('click', () => {
-    localStorage.removeItem(STORAGE_KEY);
-    THEME_NAMES.forEach(clearThemeVars);
-    syncPickers();
-  });
-
-  syncPickers();
+  root.style.setProperty('--main-color', RELATIVE_BLACK);
+  root.style.setProperty('--main-text-color', RELATIVE_BLACK);
 }
+
+try { localStorage.setItem(SWAP_KEY, on ? '1' : '0'); } catch {}
+}
+
+function swapColours() {
+setSwapped(localStorage.getItem(SWAP_KEY) !== '1');
+}
+
+setSwapped(localStorage.getItem(SWAP_KEY) === '1');
 
 //This is the hide function and all its saving stuffs.
 (function () {
