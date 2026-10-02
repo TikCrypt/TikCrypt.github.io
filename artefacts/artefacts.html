@@ -15,14 +15,11 @@
 <body class = "ar-body">
   <nav id="nav-bar">
     <ul>
-      <li class="nav-logo"><a href="/index.html"><img src="/media/logo.png" alt="logo"></a></li>
-      <li><a href="/index.html" class="nav-text">Overview</a>
-        <ul class="dropdown">
-          <li><a href="/index.html">Overview</a></li>
-          <li><a href="/about.html">About Me</a></li>
-          <li><a href="/projects.html">My Projects</a></li>
-        </ul>
-      </li>
+      <li class="nav-logo"><a href="/index.html">
+        <img class="nav-logo" src="/media/logo.png" alt="logo">
+        <span class="logo-text">TikCrypt</span>
+      </a></li>
+      <li><a href="/index.html" class="nav-text">Overview</a></li>
       <li><a href="/tikcryption/home.html" class="nav-text">TikCryption</a>
         <ul class="dropdown">
           <li><a href="/tikcryption/home.html">Home</a></li>
@@ -50,14 +47,14 @@
   </nav>
 
   <div class="title-container">
-    <img src="/media/venus-bg.png" alt="underground-background">
-  </div>
-
-  <div class="main-container">
+    <img src="/media/mars-bg.png" alt="Mars">
     <br>
     <br>
     <h2 class="ar-fancy-text" style="font-size:50px; font-weight:bold; text-align:center;">- Artefacts -</h2>
-    <br>
+    <a class="title-img-text">Mars</a>
+  </div>
+
+  <div class="main-container">
     <div class="columns">
       <div>
         <h2 class="ar-fancy-text" style="font-size:30px; text-align:center;">Artefact 1</h2>
@@ -92,7 +89,7 @@
     <br>
 
     <div class="bg-slideshow-container">
-      <h2 class="ar-fancy-text" style="font-size:30px;">Pixel Art Slideshow</h2>
+      <h2 class="ar-fancy-text" style="font-size:30px;">Legacy Pixel Art</h2>
       <img id="bg-slideshow" src="/media/uluru-bg.png" alt="Slideshow" onclick="toggleSlideshow()" style="cursor:pointer; border: 5px solid black;">
       <br>
       <br>
@@ -104,13 +101,23 @@
     </div>
 
     <script>
-    const images = ["/media/uluru-bg.png", "/media/great-barrier-reef-bg.png", "/media/venus-bg.png", "/media/earth-bg.png", "/media/mars-bg.png"];
+    const images = ["/media/uluru-bg.png",
+    "/media/great-barrier-reef-bg.png",
+    "/media/tree-bg.png",
+    "/media/underground-bg.png",
+    "/media/deeper-underground-bg.png",
+    "/media/night-desert-bg.png",
+    "/media/cibophobia-bg.png"];
+
     const captions = ["Uluru or Ayers Rock is a large sandstone monolith found in Australia.",
     "The Great Barrier Reef streches over 2,300 kilometers in length and houses a wide-variety of different marine animals.",
-    "Venus, the 2nd planet from the sun and extremely hostile for life as we know it.",
-    "Earth, the 3rd planet from the sun and the planet in which we live.",
-    "Mars, the 4th planet from the sun and a potential planet for human colonisation."
+    "Its a tree!",
+    "Oh look, underneath the tree!",
+    "Its even deeper under the tree!",
+    "Its a desert and its night time.",
+    "This was the background for Cibophobia.",
     ];
+
     const img = document.getElementById("bg-slideshow");
     const caption = document.getElementById("bg-slideshow-text");
     let index = 0;
@@ -129,7 +136,7 @@
 
     function startSlideshow() {
       clearInterval(slideshowInterval);
-      slideshowInterval = setInterval(nextSlide, 5000);
+      slideshowInterval = setInterval(nextSlide, 4000);
     }
 
     function toggleSlideshow() {
@@ -138,7 +145,7 @@
         img.style.opacity = "1";
       } else {
         clearInterval(slideshowInterval);
-        img.style.opacity = "0.6";
+        img.style.opacity = "0.4";
       }
       isPaused = !isPaused;
     }

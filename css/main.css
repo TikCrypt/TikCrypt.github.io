@@ -1,6 +1,6 @@
-/*Z indexs are as follows: 1 = body, 2 = preview, 3 = preview overlay, 4 = hide filter, 5 = nav bar*/
-/*tc = tikcryption, none = main, s = settings, ar = artefacts*/
-/*Pre-things*/
+/*Z indexs are as follows: 1 = body and footer, 2 = preview, 3 = preview overlay, 4 = hide filter, 5 = nav bar*/
+/*tc = tikcryption, none = main, s = settings, ar = artefacts, cs = coin-sim, d = desert, cp = Cibphobia*/
+/*Pre-things most of these are unused and left as legacies*/
 :root {
   /*Main*/
   --main-bg: rgb(151, 151, 151);
@@ -9,6 +9,7 @@
   /*Space*/
   --space-bg:#1d1d1d;
   --space-bg-text: #f0eae3;
+  --space-bg-text-light: #8f8f8f;
 
   /*Underground*/
   --underground-bg:#3B2A20;
@@ -25,6 +26,9 @@
   /*Some important colours. Controls MOST footers.*/
   --main-color:#f0eae3;
   --main-text-color:#f0eae3;
+
+  /*Special/Themed colour*/
+  --special-color:orange;
 }
 
 ul {
@@ -93,18 +97,26 @@ button:hover {
   font-family:sans-serif;
 }
 
-.title-container {
+.title-container{
   position:relative;
   width:100%;
-  height:60vh;
-  border-bottom: 5px solid black;
+  height:90vh;
+  text-align:center;
 }
 
-.title-text {
+.title-container img {
+  height:60vh;
+  width:100%;
+}
+
+.title-img-text {
+  color:var(--space-bg-text-light);
+  font-size:15px;
   position:absolute;
-  font-size:60px;
-  font-family: serif;
-  color:white;
+  font-family:sans-serif;
+  top:60%;
+  left:5%;
+  transform:translate(-60%,-5%);
 }
 
 .main-container {
@@ -140,6 +152,64 @@ button:hover {
 
 
 
+/*Index.html*/
+.index-head-container {
+  width:100%;
+  margin-top:30px;
+  border-bottom:4px dotted var(--space-bg-text);
+  display:flex;
+  height:80vh;
+  align-items:center;
+  text-align:center;
+  flex-direction:column;
+}
+
+.index-head-container img {
+  width:50vh;
+  height:50vh;
+}
+
+.index-about-container {
+  width:70%;
+  margin-top:30px;
+  display:relative;
+  text-align:left;
+  margin-left:50px;
+}
+
+.index-row {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5%;
+  width:100%;
+}
+
+.index-text-blob {
+  padding:15px;
+  width:25%;
+  height:200px;
+  border:1px solid var(--space-bg-text);
+  border-radius:5px;
+  text-align:left;
+}
+
+.bullet-list {
+  display:block;
+  list-style:disc outside;
+  padding-left:24px;
+  margin-left:50px;
+}
+
+.bullet-list li {
+  list-style:circle;
+  display:list-item;
+  margin-bottom:6px;
+  text-align:left;
+}
+
+
+
 /*Footer*/
 .main-footer {
   border-top:5px dashed var(--main-color);
@@ -156,7 +226,7 @@ button:hover {
 .main-footer-text {
   position:absolute;
   font-size:20px;
-  color:var(--main-text-color);
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
   font-weight:lighter;
   text-decoration:italic;
@@ -178,6 +248,10 @@ nav ul {
   display:flex;
   margin:0;
   padding: 20px 40px;
+}
+
+nav > ul {
+  flex-grow:1;
 }
 
 nav li {
@@ -227,6 +301,23 @@ nav .dropdown li {
 }
 
 .nav-logo {
+  margin-left: 0;
+}
+
+.nav-logo a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-text {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.nav-logo + li {
   margin-left: auto;
 }
 
@@ -237,65 +328,19 @@ nav .dropdown li {
 
 
 
-/*Desert*/
-.d-default-text {
-  font-weight:normal;
-  font-size:20px;
-  color:var(--desert-bg-text);
-  font-family:sans-serif;
-}
-
-.d-fancy-text {
-  font-weight:normal;
-  font-style:italic;
-  font-size:20px;
-  color:var(--desert-bg-text);
-  font-family:sans-serif;
-}
-
-.d-footer {
-  border-top:5px dashed var(--desert-bg-text);
-  width:100%;
-  height:50px;
-  position:relative;
-  text-align:center;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.d-footer-text {
-  position:absolute;
-  font-size:20px;
-  font-family:sans-serif;
-  font-weight:lighter;
-  text-decoration:italic;
-  color:var(--desert-bg-text);
-}
-
-.d-body {
-  width:100%;
-  max-width:1920px;
-  margin:0 auto;
-  z-index: 1;
-  background-color:var(--desert-bg);
-}
-
-
-
 /*Settings*/
 .s-body {
   width:100%;
   max-width:1920px;
   margin:0 auto;
   z-index: 1;
-  background-color:var(--water-bg);  
+  background-color:var(--space-bg);  
 }
 
 .s-default-text {
   font-weight:normal;
   font-size:20px;
-  color:var(--water-bg-text);
+  color:var(--space-bg-text);
   font-family:sans-serif;
 }
 
@@ -303,21 +348,21 @@ nav .dropdown li {
   font-weight:normal;
   font-style:italic;
   font-size:20px;
-  color:var(--water-bg-text);
+  color:var(--space-bg-text);
   font-family:sans-serif;
 }
 
 .s-selector {
   margin-bottom:24px;
   width:250px;
-  color:var(--water-bg-text)
+  color:var(--space-bg-text)
 }
 
 .s-selector label {
   display:flex;
   font-size:25px;
   margin-bottom:8px;
-  color:var(--water-bg-text);
+  color:var(--space-bg-text);
   font-weight:bold;
   justify-content:space-between;
 }
@@ -336,14 +381,14 @@ nav .dropdown li {
   display:flex;
   font-size:25px;
   margin-bottom:8px;
-  color:var(--water-bg-text);
+  color:var(--space-bg-text);
   font-weight:bold;
   justify-content:space-between;
   font-family:sans-serif;
 }
 
 .hide-selector label span.val {
-  color:var(--water-bg-text);
+  color:var(--space-bg-text);
   font-family:sans-serif;
   font-size:20px;
 }
@@ -352,9 +397,9 @@ nav .dropdown li {
   width:200px;
   min-height:50px;
   padding:5px;
-  background-color:var(--water-bg-text);
-  color:var(--water-bg);
-  border:5px solid var(--water-bg-text);
+  background-color:var(--space-bg-text);
+  color:var(--space-bg);
+  border:5px solid var(--space-bg-text);
 }
 
 .preview {
@@ -380,9 +425,9 @@ nav .dropdown li {
   width:200px;
   min-height:50px;
   padding:5px;
-  background-color:var(--water-bg-text);
-  color:var(--water-bg);
-  border:5px solid var(--water-bg-text);
+  background-color:var(--space-bg-text);
+  color:var(--space-bg);
+  border:5px solid var(--space-bg-text);
 }
 
 .s-footer {
@@ -399,7 +444,7 @@ nav .dropdown li {
 .s-footer-text {
   position:absolute;
   font-size:20px;
-  color:var(--main-text-color);
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
   font-weight:lighter;
   text-decoration:italic;
@@ -451,7 +496,7 @@ nav .dropdown li {
 .ar-footer-text {
   position:absolute;
   font-size:20px;
-  color:var(--main-text-color);
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
   font-weight:lighter;
   text-decoration:italic;
@@ -473,14 +518,14 @@ nav .dropdown li {
   max-width:1920px;
   margin:0 auto;
   z-index: 1;
-  background-color:var(--underground-bg);
+  background-color:var(--space-bg);
 }
 
 .tc-default-text {
   font-weight:normal;
   text-align:left;
   font-size:20px;
-  color:var(--underground-bg-text);
+  color:var(--space-bg-text);
   font-family: sans-serif;
 }
 
@@ -488,7 +533,7 @@ nav .dropdown li {
   font-weight:normal;
   font-style:italic;
   font-size:20px;
-  color:var(--underground-bg-text);
+  color:var(--space-bg-text);
   font-family:sans-serif;
 }
 
@@ -499,20 +544,13 @@ nav .dropdown li {
   transform:translate(-50%,-50%);
   font-size:55px;
   font-family: serif;
-  color:var(--underground-bg-text);
+  color:var(--space-bg-text);
 }
 
 .tc-container {
   position:relative;
   text-align:left;
   width:100%;
-}
-
-.tc-title-container {
-  position:relative;
-  width:100%;
-  height:60vh;
-  border-bottom: 5px solid black;
 }
 
 .tc-key-container {
@@ -545,8 +583,8 @@ nav .dropdown li {
   font-family: inherit, sans-serif;
   font-size: 20px;
   border: 5px solid black;
-  background-color: var(--underground-bg-text);
-  color: var(--underground-bg);
+  background-color: var(--space-bg-text);
+  color: var(--space-bg);
 }
 
 .tc-long-key {
@@ -555,14 +593,14 @@ nav .dropdown li {
   font-size: 15px;
   font-family: inherit, sans-serif;
   text-overflow: ellipsis;
-  color: var(--underground-bg-text);
+  color: var(--space-bg-text);
 }
 
 .tc-key-input {
-  background-color: var(--underground-bg-text);
-  color: var(--underground-bg);
+  background-color: var(--space-bg-text);
+  color: var(--space-bg);
   width: 20%;
-  border: 2px solid var(--underground-bg);
+  border: 2px solid var(--space-bg);
 }
 
 .tc-encrypt-button {
@@ -570,7 +608,7 @@ nav .dropdown li {
   height: 50px;
   padding: 5px;
   border: 5px solid black;
-  background-color: var(--underground-bg-text);
+  background-color: var(--space-bg-text);
 }
 
 .tc-decrypt-button {
@@ -578,7 +616,7 @@ nav .dropdown li {
   height: 50px;
   padding: 5px;
   border: 5px solid black;
-  background-color: var(--underground-bg-text);
+  background-color: var(--space-bg-text);
 }
 
 .tc-copy-button {
@@ -586,14 +624,14 @@ nav .dropdown li {
   height: 50px;
   padding: 5px;
   border: 5px solid black;
-  background-color: var(--underground-bg-text);
+  background-color: var(--space-bg-text);
 }
 
 .tc-button-text {
   font-weight:normal;
   text-align:left;
   font-size:20px;
-  color:var(--underground-bg);
+  color:var(--space-bg);
   font-family: sans-serif;
 }
 
@@ -602,7 +640,7 @@ nav .dropdown li {
   height:50px;
   position:relative;
   text-align:center;
-  border-top:5px dashed var(--underground-bg-text);
+  border-top:5px dashed var(--space-bg-text);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -611,7 +649,7 @@ nav .dropdown li {
 .tc-footer-text {
   position:absolute;
   font-size:20px;
-  color:var(--underground-bg-text);
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
   font-weight:lighter;
   text-decoration:italic;
@@ -678,7 +716,7 @@ nav .dropdown li {
 .cs-footer-text {
   position:absolute;
   font-size:20px;
-  color:var(--space-bg-text);
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
   font-weight:lighter;
   text-decoration:italic;
