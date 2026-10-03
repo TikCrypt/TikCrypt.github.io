@@ -89,6 +89,13 @@ button:hover {
   font-family:sans-serif;
 }
 
+.default-text-light {
+  font-weight:normal;
+  font-size:20px;
+  color:var(--space-bg-text-light);
+  font-family:sans-serif;
+}
+
 .fancy-text {
   font-weight:normal;
   font-style:italic;
@@ -165,8 +172,8 @@ button:hover {
 }
 
 .index-head-container img {
-  width:50vh;
-  height:50vh;
+  width:320px;
+  height:320px;
 }
 
 .index-about-container {
@@ -344,6 +351,13 @@ nav .dropdown li {
   font-family:sans-serif;
 }
 
+.s-default-text-light {
+  font-weight:normal;
+  font-size:20px;
+  color:var(--space-bg-text-light);
+  font-family:sans-serif;
+}
+
 .s-fancy-text {
   font-weight:normal;
   font-style:italic;
@@ -374,7 +388,7 @@ nav .dropdown li {
 
 .hide-selector {
   margin-bottom:24px;
-  width:250px; 
+  width:250px;
 }
 
 .hide-selector label {
@@ -469,9 +483,8 @@ nav .dropdown li {
 }
 
 .artefact-img {
-  width:40%;
-  height:40%;
-  border:5px solid black;
+  width:45%;
+  height:45%;
   object-fit: cover;
 }
 
@@ -510,6 +523,59 @@ nav .dropdown li {
   background-color:var(--space-bg);  
 }
 
+.ar-columns {
+  display:flex;
+  gap:80px;
+}
+
+.ar-column {
+  width:33%;
+  align-items:center;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  padding:15px;
+}
+
+
+
+/*Puzzles*/
+.puzzle-1 {
+  top:46%;
+  left:46.5%;
+  transform: translate(-46.5%,-46%);
+  height:3%;
+  width:2.3%;
+  opacity:6%;
+  position:absolute;
+}
+
+.puzzle-2 {
+  top:40%;
+  left:70%;
+  transform: translate(-70%,-40%);
+  height:13px;
+  width:5px;
+  background-color: rgb(254, 255, 192);
+  border:0px solid white;
+  position:absolute;
+}
+
+.puzzle-4 {
+  top:40%;
+  left:51%;
+  transform: translate(-51%,-40%);
+  height:13px;
+  width:5px;
+  background-color: rgb(108, 113, 113);
+  border:0px solid white;
+  position:absolute;
+}
+
+#hint {
+  white-space: pre-line;
+}
+
 
 
 /*TikCryption*/
@@ -517,7 +583,7 @@ nav .dropdown li {
   width:100%;
   max-width:1920px;
   margin:0 auto;
-  z-index: 1;
+  z-index:1;
   background-color:var(--space-bg);
 }
 
@@ -527,6 +593,13 @@ nav .dropdown li {
   font-size:20px;
   color:var(--space-bg-text);
   font-family: sans-serif;
+}
+
+.tc-default-text-light {
+  font-weight:normal;
+  font-size:20px;
+  color:var(--space-bg-text-light);
+  font-family:sans-serif;
 }
 
 .tc-fancy-text {
@@ -543,7 +616,7 @@ nav .dropdown li {
   left:50%;
   transform:translate(-50%,-50%);
   font-size:55px;
-  font-family: serif;
+  font-family:serif;
   color:var(--space-bg-text);
 }
 
@@ -554,37 +627,38 @@ nav .dropdown li {
 }
 
 .tc-key-container {
-  display: relative; 
-  width: 70%;
-  overflow-wrap: anywhere;
+  display:relative;
+  text-align:center;
+  width:80%;
+  overflow-wrap:anywhere;
 }
 
 .tc-encrypt-container {
-  display: relative;
-  align-items: center;
-  margin-bottom: 5px;
-  margin-top: 5px;
-  width: 70%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:90%;
+  gap:20px;
 }
 
 .tc-decrypt-container {
-  display: relative;
-  align-items: center;
-  margin-bottom: 5px;
-  margin-top: 5px;
-  width: 70%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:90%;
+  gap:20px;
 }
 
 .tc-auto-expand {
-  width: 80%;
-  min-height: 40px;
-  resize: none;
-  overflow: hidden;
-  font-family: inherit, sans-serif;
-  font-size: 20px;
-  border: 5px solid black;
-  background-color: var(--space-bg-text);
-  color: var(--space-bg);
+  width:80%;
+  min-height:40px;
+  resize:none;
+  overflow:hidden;
+  font-family:inherit, sans-serif;
+  font-size:20px;
+  border:5px solid black;
+  background-color:var(--space-bg-text);
+  color:var(--space-bg);
 }
 
 .tc-long-key {
@@ -599,12 +673,13 @@ nav .dropdown li {
 .tc-key-input {
   background-color: var(--space-bg-text);
   color: var(--space-bg);
-  width: 20%;
+  width: 500px;
+  height: 25px;
   border: 2px solid var(--space-bg);
 }
 
 .tc-encrypt-button {
-  width: 30%;
+  width: 40%;
   height: 50px;
   padding: 5px;
   border: 5px solid black;
@@ -612,7 +687,7 @@ nav .dropdown li {
 }
 
 .tc-decrypt-button {
-  width: 30%;
+  width: 40%;
   height: 50px;
   padding: 5px;
   border: 5px solid black;
@@ -655,6 +730,38 @@ nav .dropdown li {
   text-decoration:italic;
 }
 
+.tc-row {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5%;
+  width:100%;
+  flex-direction:column;
+}
+
+.tc-text-blob {
+  padding:30px;
+  width:70%;
+  border:1px solid var(--space-bg-text);
+  border-radius:5px;
+  text-align:left;
+  padding:25px;
+}
+
+.tc-text-blob-v2 {
+  padding:30px;
+  width:70%;
+  border:1px solid var(--space-bg-text);
+  border-radius:5px;
+  text-align:left;
+  padding:25px;
+  display:flex;
+  text-align:center;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+
 
 
 /*Coin Simulator*/
@@ -663,6 +770,13 @@ nav .dropdown li {
   text-align:left;
   font-size:20px;
   color:var(--space-bg-text);
+  font-family:sans-serif;
+}
+
+.cs-default-text-light {
+  font-weight:normal;
+  font-size:20px;
+  color:var(--space-bg-text-light);
   font-family:sans-serif;
 }
 

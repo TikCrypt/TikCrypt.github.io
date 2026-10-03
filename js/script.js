@@ -33,6 +33,8 @@ setSwapped(localStorage.getItem(SWAP_KEY) !== '1');
 
 setSwapped(localStorage.getItem(SWAP_KEY) === '1');
 
+
+
 //This is the hide function and all its saving stuffs.
 (function () {
   const ACTIVE_KEY = 'hideEffectActive';
@@ -219,11 +221,212 @@ setSwapped(localStorage.getItem(SWAP_KEY) === '1');
   }
 })();
 
+
+
+//Hints for the puzzle.
+const HINT_KEY = 'puzzleStage';
+const SCROLL_KEY = 'puzzleScroll';
+const DISCO_KEY = 'discoUnlocked';
+const DISCO_TEXT = '"Puzzle Solved! Disco Feature now Available at the nav bar!" \n \n WARNING: MAY TRIGGER EPILEPSY \n';
+
+const HINTS = {
+  1: '"A star burns yellow on mars."',
+  2: '"The true artefact must be clicked to continue."',
+  3: '"Water on mercury!?!"',
+  4: '"The truth hid here all along."',
+};
+
+const FINAL_STAGE = Math.max(...Object.keys(HINTS).map(Number));
+
+function addDiscoToNav() {
+  const list = document.querySelector('#nav-bar > ul');
+  if (!list || document.getElementById('disco-nav-item')) return;
+
+  const item = document.createElement('li');
+  item.id = 'disco-nav-item';
+
+  const link = document.createElement('a');
+  link.href = '#';
+  link.className = 'nav-text';
+  link.textContent = 'Disco';
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggleDisco();
+  });
+
+  item.appendChild(link);
+  list.appendChild(item);
+}
+
+function isDiscoUnlocked() {
+  try { return localStorage.getItem(DISCO_KEY) === '1'; } catch { return false; }
+}
+
+function unlockDisco(event) {
+  if (event) event.preventDefault();
+  try { localStorage.setItem(DISCO_KEY, '1'); } catch {}
+  addDiscoToNav();
+  applyHint();
+}
+
+function clearTextBelowHint() {
+  const el = document.getElementById('text-below-hint');
+  if (!el) return;
+  el.textContent = '';
+}
+
+function applyHint() {
+  const hint = document.getElementById('hint');
+  if (!hint) return;
+
+  let stage = null;
+  try { stage = localStorage.getItem(HINT_KEY); } catch {}
+
+  if (stage && HINTS[stage]) hint.textContent = HINTS[stage];
+
+  const isFinal = Number(stage) === FINAL_STAGE;
+  const unlocked = isDiscoUnlocked();
+
+  if (isFinal && unlocked) hint.textContent = DISCO_TEXT;
+
+  const clickable = isFinal && !unlocked;
+  hint.onclick = clickable ? unlockDisco : null;
+  hint.style.cursor = clickable ? 'pointer' : '';
+}
+
+function scrollToHint() {
+  const hint = document.getElementById('hint');
+  if (!hint) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  hint.scrollIntoView({
+    behavior: reduceMotion ? 'auto' : 'smooth',
+    block: 'center',
+  });
+}
+
+function changeHint(stage) {
+  if (isDiscoUnlocked()) return;
+  if (!HINTS[stage]) return;
+
+  try { localStorage.setItem(HINT_KEY, String(stage)); } catch {}
+
+  const path = location.pathname;
+  if (path === '/' || path.endsWith('/index.html')) {
+    applyHint();
+    scrollToHint();
+  } else {
+    try { sessionStorage.setItem(SCROLL_KEY, '1'); } catch {}
+    location.href = '/index.html';
+  }
+}
+
+function initHints() {
+  applyHint();
+  if (isDiscoUnlocked()) addDiscoToNav();
+  if (isDiscoUnlocked()) clearTextBelowHint();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHints);
+} else {
+  initHints();
+}
+
+window.addEventListener('load', () => {
+  let pending = false;
+  try {
+    pending = sessionStorage.getItem(SCROLL_KEY) === '1';
+    sessionStorage.removeItem(SCROLL_KEY);
+  } catch {}
+
+  if (pending) setTimeout(scrollToHint, 100);
+});
+
+
+//Disco function
+let rainbowTimer = null;
+let rainbowLayer = null;
+let rainbowHue = 0;
+
+function spawnDisco() {
+  const size = 120 + Math.random() * 260;
+  rainbowHue = (rainbowHue + 25 + Math.random() * 30) % 360;
+
+  const flash = document.createElement('div');
+  flash.className = 'rainbow-flash';
+  flash.style.cssText = `
+    left: ${Math.random() * 100}vw;
+    top: ${Math.random() * 100}vh;
+    width: ${size}px;
+    height: ${size}px;
+    background: radial-gradient(circle, hsl(${rainbowHue} 100% 60% / 0.85), transparent 80%);
+  `;
+  flash.addEventListener('animationend', () => flash.remove());
+  rainbowLayer.appendChild(flash);
+}
+
+function startDisco() {
+  if (!document.getElementById('rainbow-style')) {
+    const style = document.createElement('style');
+    style.id = 'rainbow-style';
+    style.textContent = `
+      #rainbow-layer {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 3;
+      }
+      .rainbow-flash {
+        position: absolute;
+        border-radius: 50%;
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: rainbow-pop 0.7s ease-out forwards;
+      }
+      @keyframes rainbow-pop {
+        0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+        20%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  rainbowLayer = document.createElement('div');
+  rainbowLayer.id = 'rainbow-layer';
+  document.body.appendChild(rainbowLayer);
+
+  rainbowTimer = setInterval(() => {
+    spawnDisco();
+    spawnDisco();
+  }, 150);
+}
+
+function stopDisco() {
+  clearInterval(rainbowTimer);
+  rainbowTimer = null;
+  if (rainbowLayer) {
+    rainbowLayer.remove();
+    rainbowLayer = null;
+  }
+}
+
+function toggleDisco() {
+  if (rainbowTimer) stopDisco();
+  else startDisco();
+}
+
+
+
 //This function helps with expanding the text field
 function autoExpand(field) {
   field.style.height = "inherit";
   field.style.height = `${field.scrollHeight}px`;
 }
+
+
 
 //This is the function that gets a random key.
 function getKey() {

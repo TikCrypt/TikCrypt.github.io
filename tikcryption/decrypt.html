@@ -55,22 +55,45 @@
   </div>
 
   <div class="tc-container">
-    <a class="tc-default-text" style="margin-left:30px;">1 - Input text into the textarea below.</a><br>
-    <a class="tc-default-text" style="margin-left:30px;">2 - Click the decrypt button to decrypt your message.</a><br>
+    <div class="tc-row">
+      <div class="tc-text-blob">
+        <a class="tc-default-text" style="font-weight:bold; font-size:23px;">How to Use:</a><br>
+        <a class="tc-default-text-light">1 - Input text into the textarea below.</a><br>
+        <a class="tc-default-text-light">1 - Input key into the key input below.</a><br>
+        <a class="tc-default-text-light">3 - Click the decrypt button to decrypt your message.</a><br>
+      </div>
+    </div>
+
+    <br>
+    <br>
+    <br>
     <br>
     <br>
 
-    <textarea id="decrypt-input" class="tc-auto-expand" rows="6" oninput="autoExpand(this)" style="margin-left:30px;">Enter stuff here...</textarea>
-    <br>
-    <div class="tc-decrypt-container" style="margin-left:30px;">
-      <button class="tc-decrypt-button" onclick="decryptionFunction()"><a class="tc-button-text">Decrypt</a></button>
-      <button class="tc-decrypt-button" onclick="copyText('decrypt-input')"><a class="tc-button-text">Copy</a></button>
+    <div class="tc-row">
+      <div class="tc-text-blob-v2">
+        <h2 class="tc-default-text" style="font-size:30px; font-weight:bold;">Decryption Box:</h2>
+        <textarea id="decrypt-input" class="tc-auto-expand" rows="5" oninput="autoExpand(this)" style="margin-left:30px;">Enter stuff here...</textarea>
+        <br>
+        <div class="tc-decrypt-container" style="margin-left:30px;">
+          <button class="tc-decrypt-button" onclick="decryptionFunction()"><a class="tc-button-text">Decrypt</a></button>
+          <button class="tc-decrypt-button" onclick="copyText('decrypt-input')"><a class="tc-button-text">Copy</a></button>
+        </div>
+      </div>
     </div>
+    
     <br>
     <br>
     <br>
-    <h2 class="tc-fancy-text" style="font-size:23px; font-weight:bold; margin-left:30px;"> Your Key: </h2> <br>
-    <input id="key-input" class="tc-key-input" type="text" placeholder="Key holder" style="margin-left:30px;">
+    <br>
+    <br>
+
+    <div class="tc-row">
+      <div class="tc-text-blob-v2">
+        <h2 class="tc-default-text" style="font-size:30px; font-weight:bold;">Key Box:</h2>
+        <input id="key-input" class="tc-key-input" type="text" placeholder="Key holder">
+      </div>
+    </div>
   </div>
 
   <br>

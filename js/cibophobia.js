@@ -1,5 +1,5 @@
 const gameContainer = document.querySelector('.cp-game-container');
-const LEVEL_COUNT = 2;
+const LEVEL_COUNT = 4;
 const DIFFICULTIES = {
   easy: { label: 'Easy', lives: 5 },
   medium: { label: 'Medium', lives: 3 },
@@ -39,13 +39,58 @@ const LEVELS = {
     messages: [
       { at: 1, text: 'Press space to fire!' },
       { at: 15, text: 'It turns out coconuts are pretty effective bullets.' },
+      { at: 35, text: 'A large creature breaks through the surface.' },
+    ],
+  },
+  3: {
+    duration: 45,
+    maxWorms: 5,
+    maxFish: 2,
+    maxPrawns: 3,
+    prawnFromSeconds: 5,
+    fishLastSeconds: 20,
+    shooting: true,
+    playerSrc: 'media/crab-cannon.png',
+    story: [
+      'Your vengeance begins!',
+      'And a new foe approaches to claim your life!',
+    ],
+    messages: [
+      { at: 1, text: 'Prawns have homing! Beware!' },
+      { at: 8, text: 'Best to avoid getting hit!' },
+    ],
+  },
+  4: {
+    duration: 120,
+    maxWorms: 6,
+    maxFish: 2,
+    maxPrawns: 3,
+    maxCatfish: 2,
+    catfishFromSeconds: 10,
+    prawnFromSeconds: 20,
+    fishLastSeconds: 60,
+    shooting: true,
+    boss: 'prawn',
+    playerSrc: 'media/crab-cannon.png',
+    story: [
+      'The prawns grow braver.',
+      'It looks like they have called in a friend...',
+    ],
+    messages: [
+      { at: 1, text: 'Catfish charge down a single lane.' },
+      { at: 70, text: 'Endure, they cannot come forever.' },
+      { at: 112, text: 'Is that an earthquake? No... it is something more...' },
     ],
   },
   endless: {
     endless: true,
+    shooting: true,
+    bossEvery: 90,
+    playerSrc: 'media/crab-cannon.png',
     story: [
       "Wait this isn't canonical?",
       "Why is this message even here?",
+      "Endure the infinite I guess?",
     ],
     messages: [
       { at: 1, text: 'Goal: Survive.' },
@@ -53,7 +98,30 @@ const LEVELS = {
   },
 };
 let currentLevel = LEVELS[1];
+let currentLevelId = 1;
 let selectedDifficulty = 'medium';
+
+const PROGRESS_KEY = 'cibophobiaProgress';
+let beatenInMemory = 0;
+
+function getHighestBeaten() {
+  let stored = 0;
+  try { stored = parseInt(localStorage.getItem(PROGRESS_KEY), 10); } catch {}
+  if (!Number.isInteger(stored)) stored = 0;
+  return clamp(Math.max(stored, beatenInMemory), 0, LEVEL_COUNT);
+}
+
+function isLevelUnlocked(level) {
+  if (level === 'endless') return true;
+  return level <= getHighestBeaten() + 1;
+}
+
+function recordLevelBeaten(level) {
+  if (typeof level !== 'number' || level <= getHighestBeaten()) return null;
+  beatenInMemory = level;
+  try { localStorage.setItem(PROGRESS_KEY, String(level)); } catch {}
+  return level < LEVEL_COUNT ? level + 1 : null;
+}
 
 let introVideo = null;
 let introDone = false;
@@ -143,9 +211,15 @@ function showLevelSelect() {
   for (let n = 1; n <= LEVEL_COUNT; n++) levelChoices.push(n);
 
   for (const level of levelChoices) {
+    const unlocked = isLevelUnlocked(level);
+    const name = level === 'endless' ? 'Endless' : `Level ${level}`;
     const button = document.createElement('button');
-    button.textContent = level === 'endless' ? 'Endless' : `Level ${level}`;
+    button.textContent = unlocked ? name : `${name} (Locked)`;
     button.className = 'cp-level-button cp-bubble cp-bubble-large';
+    if (!unlocked) {
+      button.disabled = true;
+      button.title = `Beat Level ${level - 1} to unlock`;
+    }
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       startLevel(level);
@@ -256,6 +330,8 @@ const MOVE_KEYS = {
 };
 
 function startLevel(level) {
+  if (!isLevelUnlocked(level)) return;
+
   const story = LEVELS[level].story;
   if (!story) {
     beginLevel(level);
@@ -311,6 +387,7 @@ function startLevel(level) {
 }
 
 function beginLevel(level) {
+  currentLevelId = level;
   levelActive = true;
   gameContainer.replaceChildren();
   gameContainer.style.backgroundColor = 'var(--sand-main)';
@@ -341,7 +418,7 @@ function beginLevel(level) {
   hud.append(scoreEl, timer, livesEl);
 
   bossBar = null;
-  if (LEVELS[level].boss) {
+  if (LEVELS[level].boss || LEVELS[level].bossEvery) {
     const bar = document.createElement('div');
     bar.className = 'cp-boss-bar';
     bar.style.cssText = `
@@ -368,9 +445,25 @@ function beginLevel(level) {
 }
 
 const FALLERS = {
-  fish: { src: 'media/fish.png', speed: 0.7, sideways: true, hp: 3, points: 25, dodgePoints: 0 },
-  worm: { src: 'media/worm.gif', speed: 0.7, sideways: false, hp: 2, points: 10, dodgePoints: 0 },
+  fish: { src: 'media/fish.png', speed: 0.7, sideways: true, hp: 2, points: 25, dodgePoints: 0 },
+  worm: { src: 'media/worm.gif', speed: 0.7, sideways: false, hp: 1, points: 10, dodgePoints: 0 },
+  prawn: { src: 'media/prawn.gif', speed: 2.5, sideways: false, homing: true, hp: 1, points: 40, dodgePoints: 0 },
+  catfish: { src: 'media/catfish.png', speed: 1.5, sideways: false, charger: true, hp: 3, points: 50, dodgePoints: 0 },
 };
+
+const CATFISH_TELEGRAPH = 1.6;
+const CATFISH_LOCK_TIME = 0.7;
+const CATFISH_SLIDE_SPEED = 8;
+const CATFISH_CHARGE_SPEED = 10;
+
+const PRAWN_BOSS_SRC = 'media/prawn.gif';
+const PRAWN_BOSS_W = 2;
+const PRAWN_BOSS_H = 2;
+const PRAWN_BOSS_HP = 30;
+const PRAWN_BOSS_SPEED = 6;
+const PRAWN_BOSS_SUMMON_TIME = 5;
+const PRAWN_BOSS_SUMMON_GAP = 0.5;
+
 const BOSS_HIT_POINTS = 5;
 const BOSS_KILL_POINTS = 500;
 const SPAWN_MIN = 0.4;
@@ -406,6 +499,110 @@ function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = Math.floor(totalSeconds % 60);
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function lockOnPlayer(faller, grid) {
+  faller.targetCol = playerCol;
+  faller.targetRow = playerRow;
+
+  const dx = faller.targetCol - faller.col;
+  const dy = faller.targetRow - faller.row;
+  const dist = Math.hypot(dx, dy) || 1;
+  faller.vx = (dx / dist) * faller.speed;
+  faller.vy = (dy / dist) * faller.speed;
+
+  const outline = 'fill="none" stroke-linecap="round"';
+  const parts =
+    '<circle cx="50" cy="50" r="30"/>' +
+    '<path d="M50 8V32M50 68V92M8 50H32M68 50H92"/>';
+  const marker = document.createElement('div');
+  marker.className = 'cp-target-marker';
+  marker.innerHTML =
+    '<svg viewBox="0 0 100 100" width="100%" height="100%">' +
+    `<g ${outline} stroke="white" stroke-width="11">${parts}</g>` +
+    `<g ${outline} stroke="red" stroke-width="6">${parts}</g>` +
+    '</svg>';
+  marker.style.cssText = `
+    position: absolute;
+    left: ${(faller.targetCol * 100) / GRID_COLS}%;
+    top: ${(faller.targetRow * 100) / GRID_ROWS}%;
+    width: ${100 / GRID_COLS}%;
+    height: ${100 / GRID_ROWS}%;
+    pointer-events: none;
+    z-index: 3;
+    animation: cp-target-pulse 0.35s ease-in-out infinite alternate;
+  `;
+  grid.appendChild(marker);
+  faller.targetEl = marker;
+}
+
+function clearTargetMarker(faller) {
+  if (faller.targetEl) {
+    faller.targetEl.remove();
+    faller.targetEl = null;
+  }
+}
+
+function showLaneWarning(faller) {
+  const warn = document.createElement('div');
+  warn.className = 'cp-catfish-warning';
+  warn.style.cssText = `
+    position: absolute;
+    top: 0;
+    height: 100%;
+    left: ${(faller.lockCol * 100) / GRID_COLS}%;
+    width: ${100 / GRID_COLS}%;
+    box-sizing: border-box;
+    background: rgba(200, 40, 20, 0.22);
+    border-left: 3px solid rgba(200, 40, 20, 0.7);
+    border-right: 3px solid rgba(200, 40, 20, 0.7);
+    pointer-events: none;
+    z-index: 0;
+    animation: cp-warn-flash 0.2s steps(2) infinite alternate;
+  `;
+  faller.el.parentNode.appendChild(warn);
+  faller.warnEl = warn;
+}
+
+function clearLaneWarning(faller) {
+  if (faller.warnEl) {
+    faller.warnEl.remove();
+    faller.warnEl = null;
+  }
+}
+
+function updateCharger(faller, dt) {
+  if (faller.phase === 'enter') {
+    faller.row += faller.speed * dt;
+    if (faller.row >= 0) {
+      faller.row = 0;
+      faller.phase = 'telegraph';
+      faller.phaseTimer = CATFISH_TELEGRAPH;
+    }
+  } else if (faller.phase === 'telegraph') {
+    faller.phaseTimer -= dt;
+    const step = CATFISH_SLIDE_SPEED * dt;
+
+    if (faller.lockCol === null) {
+      faller.col += clamp(playerCol - faller.col, -step, step);
+      if (faller.phaseTimer <= CATFISH_LOCK_TIME) {
+        faller.lockCol = playerCol;
+        showLaneWarning(faller);
+      }
+    } else {
+      faller.col += clamp(faller.lockCol - faller.col, -step, step);
+      faller.el.style.translate = `${(Math.random() - 0.5) * 6}px 0`;
+    }
+
+    if (faller.lockCol !== null && faller.phaseTimer <= 0 && Math.abs(faller.col - faller.lockCol) < 0.05) {
+      faller.col = faller.lockCol;
+      faller.el.style.translate = '';
+      clearLaneWarning(faller);
+      faller.phase = 'charge';
+    }
+  } else if (faller.phase === 'charge') {
+    faller.row += CATFISH_CHARGE_SPEED * dt;
+  }
 }
 
 function showShiftArrow(faller) {
@@ -446,6 +643,8 @@ function placeFaller(faller) {
 
 function removeFaller(faller) {
   clearShiftArrow(faller);
+  clearTargetMarker(faller);
+  clearLaneWarning(faller);
   faller.el.remove();
   fallers = fallers.filter((f) => f !== faller);
 }
@@ -455,6 +654,8 @@ function getParams(t) {
     return {
       maxWorms: Math.min(12, 2 + Math.floor(t / 10)),
       maxFish: t < 20 ? 0 : Math.min(6, 1 + Math.floor((t - 20) / 20)),
+      maxPrawns: t < 30 ? 0 : Math.min(5, 1 + Math.floor((t - 30) / 30)),
+      maxCatfish: t < 45 ? 0 : Math.min(4, 1 + Math.floor((t - 45) / 45)),
       spawnMin: Math.max(0.25, 1.2 - t * 0.012),
       spawnMax: Math.max(0.6, 3 - t * 0.03),
       speedMult: Math.min(2.5, 1 + t / 60),
@@ -463,6 +664,8 @@ function getParams(t) {
   return {
     maxWorms: currentLevel.maxWorms,
     maxFish: t >= currentLevel.duration - currentLevel.fishLastSeconds ? currentLevel.maxFish : 0,
+    maxPrawns: t >= (currentLevel.prawnFromSeconds || 0) ? (currentLevel.maxPrawns || 0) : 0,
+    maxCatfish: t >= (currentLevel.catfishFromSeconds || 0) ? (currentLevel.maxCatfish || 0) : 0,
     spawnMin: SPAWN_MIN,
     spawnMax: SPAWN_MAX,
     speedMult: currentLevel.speedMult || 1,
@@ -471,20 +674,19 @@ function getParams(t) {
 
 function spawnFaller(grid) {
   const params = getParams(gameElapsed);
-  const wormCount = fallers.filter((f) => f.type === 'worm').length;
-  const fishCount = fallers.filter((f) => f.type === 'fish').length;
-  const fishAllowed = fishCount < params.maxFish;
-  const wormAllowed = wormCount < params.maxWorms;
+  const count = (type) => fallers.filter((f) => f.type === type).length;
 
   const available = [];
-  if (wormAllowed) available.push('worm');
-  if (fishAllowed) available.push('fish');
+  if (count('worm') < params.maxWorms) available.push('worm');
+  if (count('fish') < params.maxFish) available.push('fish');
+  if (count('prawn') < params.maxPrawns) available.push('prawn');
+  if (count('catfish') < params.maxCatfish) available.push('catfish');
   if (available.length === 0) return;
   const type = available[Math.floor(Math.random() * available.length)];
 
   const columns = Array.from({ length: GRID_COLS }, (_, i) => i);
   const freeColumns = columns.filter(
-    (c) => !fallers.some((f) => f.col === c && f.row < 1.5)
+    (c) => !fallers.some((f) => Math.abs(f.col - c) < 1 && f.row < 1.5)
   );
   if (freeColumns.length === 0) return;
   const col = freeColumns[Math.floor(Math.random() * freeColumns.length)];
@@ -522,11 +724,25 @@ function createFaller(grid, type, col, row, speedMult) {
     nextShift: randomBetween(SHIFT_MIN, SHIFT_MAX),
     pendingDir: 0,
     arrowEl: null,
+    homing: !!config.homing,
+    vx: 0,
+    vy: 0,
+    targetCol: 0,
+    targetRow: 0,
+    targetEl: null,
+    charger: !!config.charger,
+    phase: 'enter',
+    phaseTimer: 0,
+    lockCol: null,
+    warnEl: null,
   };
 
   placeFaller(faller);
   grid.appendChild(el);
   fallers.push(faller);
+
+  if (faller.homing) lockOnPlayer(faller, grid);
+
   return faller;
 }
 
@@ -541,7 +757,20 @@ function updateSpawners(grid, dt) {
 
 function updateFallers(dt) {
   for (const faller of [...fallers]) {
-    faller.row += faller.speed * dt;
+    if (faller.homing) {
+      faller.col += faller.vx * dt;
+      faller.row += faller.vy * dt;
+
+      const toCol = faller.targetCol - faller.col;
+      const toRow = faller.targetRow - faller.row;
+      if (faller.targetEl && toCol * faller.vx + toRow * faller.vy <= 0) {
+        clearTargetMarker(faller);
+      }
+    } else if (faller.charger) {
+      updateCharger(faller, dt);
+    } else {
+      faller.row += faller.speed * dt;
+    }
 
     if (faller.sideways) {
       faller.nextShift -= dt;
@@ -562,13 +791,16 @@ function updateFallers(dt) {
       }
     }
 
-    if (faller.row >= GRID_ROWS) {
+    const offscreen = faller.homing
+      ? faller.row > GRID_ROWS || faller.row < -1 || faller.col > GRID_COLS || faller.col < -1
+      : faller.row >= GRID_ROWS || faller.col < -1 || faller.col > GRID_COLS;
+    if (offscreen) {
       addScore(faller.dodgePoints);
       removeFaller(faller);
       continue;
     }
 
-    if (faller.col === playerCol && Math.abs(faller.row - playerRow) < 0.75) {
+    if (Math.abs(faller.col - playerCol) < 0.75 && Math.abs(faller.row - playerRow) < 0.75) {
       removeFaller(faller);
       takeDamage();
       continue;
@@ -654,7 +886,7 @@ function updateProjectiles(dt) {
 
     const target = fallers.find(
       (f) =>
-        f.col === projectile.col &&
+        Math.abs(f.col - projectile.col) < 0.6 &&
         f.row < projectile.prevRow + 0.4 &&
         f.row + 1 > projectile.row
     );
@@ -669,9 +901,9 @@ function updateProjectiles(dt) {
       boss.phase !== 'enter' &&
       boss.phase !== 'dead' &&
       projectile.col + 0.6 > boss.x &&
-      projectile.col + 0.4 < boss.x + BOSS_W &&
+      projectile.col + 0.4 < boss.x + boss.w &&
       boss.row < projectile.prevRow + 0.4 &&
-      boss.row + BOSS_H > projectile.row
+      boss.row + boss.h > projectile.row
     ) {
       removeProjectile(projectile);
       damageBoss();
@@ -683,7 +915,6 @@ function updateProjectiles(dt) {
   }
 }
 
-// ---------- Boss ----------
 const BOSS_SRC = 'media/fish.png';
 const BOSS_W = 3;
 const BOSS_H = 3;
@@ -699,13 +930,24 @@ const BOSS_CONTACT_COOLDOWN = 1.2;
 
 let boss = null;
 let bossBar = null;
+let bossesDefeated = 0;
+let nextBossAt = Infinity;
+
+function scaledHp(base) {
+  return Math.round(base * (currentLevel.bossEvery ? 1 + 0.25 * bossesDefeated : 1));
+}
 
 function placeBoss() {
   boss.el.style.left = `${(boss.x * 100) / GRID_COLS}%`;
   boss.el.style.top = `${(boss.row * 100) / GRID_ROWS}%`;
 }
 
-function startBoss(grid) {
+function startBoss(grid, kind = currentLevel.boss) {
+  if (kind === 'prawn') {
+    startPrawnBoss(grid);
+    return;
+  }
+
   const el = document.createElement('img');
   el.className = 'cp-boss';
   el.src = BOSS_SRC;
@@ -722,10 +964,12 @@ function startBoss(grid) {
 
   boss = {
     el,
+    w: BOSS_W,
+    h: BOSS_H,
     x: (GRID_COLS - BOSS_W) / 2,
     row: -BOSS_H,
-    hp: BOSS_HP,
-    maxHp: BOSS_HP,
+    hp: scaledHp(BOSS_HP),
+    maxHp: scaledHp(BOSS_HP),
     phase: 'enter',
     phaseTimer: 0,
     chargeTimer: 0,
@@ -795,9 +1039,9 @@ function spawnFishWave(grid) {
 function bossTouchesPlayer() {
   return (
     playerCol + 1 > boss.x + 0.2 &&
-    playerCol < boss.x + BOSS_W - 0.2 &&
+    playerCol < boss.x + boss.w - 0.2 &&
     playerRow + 1 > boss.row + 0.2 &&
-    playerRow < boss.row + BOSS_H - 0.2
+    playerRow < boss.row + boss.h - 0.2
   );
 }
 
@@ -811,11 +1055,26 @@ function damageBoss() {
     boss.phase = 'dead';
     clearBossWarning();
     addScore(BOSS_KILL_POINTS);
-    finishLevel();
+    if (currentLevel.bossEvery) defeatBoss();
+    else finishLevel();
   }
 }
 
+function defeatBoss() {
+  boss.el.remove();
+  boss = null;
+  bossesDefeated += 1;
+  nextBossAt = gameElapsed + currentLevel.bossEvery;
+  if (bossBar) bossBar.bar.style.display = 'none';
+  showMessage('The boss is down. Survive!');
+}
+
 function updateBoss(dt, grid) {
+  if (boss.kind === 'prawn') {
+    updatePrawnBoss(dt, grid);
+    return;
+  }
+
   boss.contactCooldown = Math.max(0, boss.contactCooldown - dt);
   const maxX = GRID_COLS - BOSS_W;
   const rage = boss.hp / boss.maxHp;
@@ -848,7 +1107,6 @@ function updateBoss(dt, grid) {
     boss.phaseTimer -= dt;
 
     if (boss.lockX === null) {
-      // Track the player's lane, then lock on
       slideBoss(clamp(playerCol - 1, 0, maxX), dt);
       if (boss.phaseTimer <= BOSS_LOCK_TIME) {
         boss.lockX = clamp(playerCol - 1, 0, maxX);
@@ -888,6 +1146,140 @@ function updateBoss(dt, grid) {
   placeBoss();
 }
 
+function startPrawnBoss(grid) {
+  const el = document.createElement('img');
+  el.className = 'cp-boss cp-prawn-boss';
+  el.src = PRAWN_BOSS_SRC;
+  el.alt = 'Prawn Boss';
+  el.draggable = false;
+  el.style.cssText = `
+    position: absolute;
+    width: ${(PRAWN_BOSS_W * 100) / GRID_COLS}%;
+    height: ${(PRAWN_BOSS_H * 100) / GRID_ROWS}%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+  `;
+
+  const angle = randomBetween(0.5, 1.0);
+  boss = {
+    kind: 'prawn',
+    el,
+    w: PRAWN_BOSS_W,
+    h: PRAWN_BOSS_H,
+    x: (GRID_COLS - PRAWN_BOSS_W) / 2,
+    row: -PRAWN_BOSS_H,
+    hp: scaledHp(PRAWN_BOSS_HP),
+    maxHp: scaledHp(PRAWN_BOSS_HP),
+    phase: 'enter',
+    dirX: Math.cos(angle) * (Math.random() < 0.5 ? -1 : 1),
+    dirY: Math.sin(angle),
+    summonTimer: 4,
+    summonLeft: 0,
+    spawnTimer: 0,
+    contactCooldown: 0,
+    warnEl: null,
+  };
+
+  placeBoss();
+  grid.appendChild(el);
+
+  if (bossBar) {
+    bossBar.bar.style.display = 'block';
+    bossBar.fill.style.width = '100%';
+  }
+  showMessage('A colossal prawn bursts in!');
+}
+
+function spawnTopPrawn(grid) {
+  const col = Math.floor(Math.random() * GRID_COLS);
+  createFaller(grid, 'prawn', col, -1, 1);
+}
+
+function setPrawnBossDirection() {
+  const angle = randomBetween(0.5, 1.0);
+  boss.dirX = Math.cos(angle) * (Math.random() < 0.5 ? -1 : 1);
+  boss.dirY = Math.sin(angle);
+}
+
+function updatePrawnBoss(dt, grid) {
+  boss.contactCooldown = Math.max(0, boss.contactCooldown - dt);
+  const rage = boss.hp / boss.maxHp;
+  const speed = PRAWN_BOSS_SPEED * (1 + 0.5 * (1 - rage));
+
+  if (boss.phase === 'enter') {
+    boss.row += BOSS_ENTER_SPEED * dt;
+    if (boss.row >= 0) {
+      boss.row = 0;
+      boss.phase = 'bounce';
+    }
+  } else if (boss.phase === 'bounce') {
+    boss.x += boss.dirX * speed * dt;
+    boss.row += boss.dirY * speed * dt;
+
+    const maxX = GRID_COLS - boss.w;
+    const maxY = GRID_ROWS - boss.h;
+    if (boss.x <= 0) {
+      boss.x = 0;
+      boss.dirX = Math.abs(boss.dirX);
+    } else if (boss.x >= maxX) {
+      boss.x = maxX;
+      boss.dirX = -Math.abs(boss.dirX);
+    }
+    if (boss.row <= 0) {
+      boss.row = 0;
+      boss.dirY = Math.abs(boss.dirY);
+    } else if (boss.row >= maxY) {
+      boss.row = maxY;
+      boss.dirY = -Math.abs(boss.dirY);
+    }
+
+    boss.summonTimer -= dt;
+    if (boss.summonTimer <= 0) boss.phase = 'toCenter';
+  } else if (boss.phase === 'toCenter') {
+    const targetX = (GRID_COLS - boss.w) / 2;
+    const dx = targetX - boss.x;
+    const dy = -boss.row;
+    const dist = Math.hypot(dx, dy);
+    const step = speed * 1.5 * dt;
+
+    if (dist <= step) {
+      boss.x = targetX;
+      boss.row = 0;
+      boss.phase = 'summon';
+      boss.summonLeft = PRAWN_BOSS_SUMMON_TIME;
+      boss.spawnTimer = 0.2;
+      showMessage('The prawn calls for backup!');
+    } else {
+      boss.x += (dx / dist) * step;
+      boss.row += (dy / dist) * step;
+    }
+  } else if (boss.phase === 'summon') {
+    boss.summonLeft -= dt;
+    boss.spawnTimer -= dt;
+
+    if (boss.spawnTimer <= 0) {
+      const prawnCount = fallers.filter((f) => f.type === 'prawn').length;
+      if (prawnCount < 8) spawnTopPrawn(grid);
+      boss.spawnTimer = PRAWN_BOSS_SUMMON_GAP * (0.6 + 0.4 * rage);
+    }
+
+    if (boss.summonLeft <= 0) {
+      boss.phase = 'bounce';
+      boss.summonTimer = randomBetween(6, 9) * (0.6 + 0.4 * rage);
+      setPrawnBossDirection();
+    }
+  }
+
+  if (boss.phase !== 'enter' && boss.contactCooldown <= 0 && bossTouchesPlayer()) {
+    boss.contactCooldown = BOSS_CONTACT_COOLDOWN;
+    takeDamage();
+    if (!gameRunning) return;
+  }
+
+  placeBoss();
+}
+
 let lives = 0;
 let livesDisplay = null;
 let gameRunning = false;
@@ -900,7 +1292,6 @@ function addScore(points) {
   if (scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
 }
 
-// ---------- Settings / pause menu ----------
 let paused = false;
 let settingsEl = null;
 let gameLoop = null;
@@ -1004,7 +1395,7 @@ function takeDamage() {
   if (lives <= 0) endGame();
 }
 
-function showEndScreen(headingText, messageText) {
+function showEndScreen(headingText, messageText, extraText) {
   gameRunning = false;
   levelActive = false;
   cancelAnimationFrame(gameFrame);
@@ -1032,6 +1423,14 @@ function showEndScreen(headingText, messageText) {
   message.style.margin = '0';
 
   screen.append(heading, message);
+
+  if (extraText) {
+    const extra = document.createElement('p');
+    extra.textContent = extraText;
+    extra.style.margin = '0';
+    screen.appendChild(extra);
+  }
+
   gameContainer.appendChild(screen);
 
   setTimeout(showLevelSelect, GAME_OVER_DELAY);
@@ -1044,7 +1443,12 @@ function endGame() {
 
 function finishLevel() {
   if (!gameRunning) return;
-  showEndScreen('Level Complete!', `Lives left: ${lives} | Score: ${score}`);
+  const nextLevel = recordLevelBeaten(currentLevelId);
+  showEndScreen(
+    'Level Complete!',
+    `Lives left: ${lives} | Score: ${score}`,
+    nextLevel ? `Level ${nextLevel} unlocked!` : ''
+  );
 }
 
 function startGame(grid, timerEl, livesEl, startingLives, level) {
@@ -1061,6 +1465,8 @@ function startGame(grid, timerEl, livesEl, startingLives, level) {
   spawnTimer = randomBetween(0.3, 1.5);
   nextMessage = 0;
   boss = null;
+  bossesDefeated = 0;
+  nextBossAt = currentLevel.bossEvery || Infinity;
   projectiles = [];
   lastShot = 0;
   gameLast = performance.now();
@@ -1078,6 +1484,9 @@ function startGame(grid, timerEl, livesEl, startingLives, level) {
 
     if (currentLevel.endless) {
       timerEl.textContent = formatTime(gameElapsed);
+      if (!boss && gameElapsed >= nextBossAt) {
+        startBoss(grid, bossesDefeated % 2 === 0 ? 'fish' : 'prawn');
+      }
     } else if (boss) {
       timerEl.textContent = 'BOSS';
     } else {
@@ -1178,6 +1587,17 @@ function injectStyles() {
     .cp-bubble-selected:hover {
       background: #c48c36;
     }
+    .cp-bubble:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .cp-bubble:disabled:hover {
+      background: #d9b779;
+    }
+    .cp-bubble:disabled:active {
+      translate: none;
+      box-shadow: 0 4px 0 #7a5628;
+    }
     .cp-message {
       position: fixed;
       left: 1rem;
@@ -1206,6 +1626,10 @@ function injectStyles() {
     @keyframes cp-warn-flash {
       from { opacity: 0.4; }
       to { opacity: 1; }
+    }
+    @keyframes cp-target-pulse {
+      from { transform: scale(0.7); opacity: 0.6; }
+      to { transform: scale(1); opacity: 1; }
     }
   `;
   document.head.appendChild(style);

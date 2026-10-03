@@ -56,31 +56,59 @@
   </div>
 
   <div class="tc-container">
-    <a class="tc-default-text" style="margin-left:30px;">1 - Input text into the textarea below.</a><br>
-    <a class="tc-default-text" style="margin-left:30px;">2 - Click the encrypt button to encrypt your message.</a><br>
+    <div class="tc-row">
+      <div class="tc-text-blob">
+        <a class="tc-default-text" style="font-weight:bold; font-size:23px;">How to Use:</a><br>
+        <a class="tc-default-text-light">1 - Input text into the textarea below.</a><br>
+        <a class="tc-default-text-light">2 - Click the encrypt button to encrypt your message.</a><br>
+        <a class="tc-default-text-light">3 - Copy your encrypted text (and the key) and use the decrypt tool to decrypt the text.</a><br>
+        <br>
+        <br>
+        <br>
+        <a class="tc-default-text" style="font-weight:bold; font-size:23px;">Notes:</a><br>
+        <a class="tc-default-text-light"> - DO NOT trust TikCryption for serious matters.</a><br>
+        <a class="tc-default-text-light"> - Key's persist from the decryption to encryption pages!</a><br>
+        <a class="tc-default-text-light"> - Your message doesn't, so make sure you copy it!</a><br>
+        <a class="tc-default-text-light"> - TikCryption also works in some other languages such as Chinese.</a><br>
+      </div>
+    </div>
+
     <br>
-    <a class="tc-default-text" style="margin-left:30px;">Notes:</a><br>
-    <a class="tc-default-text" style="margin-left:30px;"> - DO NOT trust TikCryption for serious matters.</a><br>
-    <a class="tc-default-text" style="margin-left:30px;"> - Key's persist from the decryption to encryption pages!</a><br>
-    <a class="tc-default-text" style="margin-left:30px;"> - Your message doesn't, so make sure you copy it!</a><br>
-    <a class="tc-default-text" style="margin-left:30px;"> - TikCryption also works in some other languages such as Chinese.</a><br>
+    <br>
+    <br>
     <br>
     <br>
 
-    <textarea id="encrypt-input" class="tc-auto-expand" rows="5" oninput="autoExpand(this)" style="margin-left:30px;">Enter stuff here...</textarea>
-    <br>
-    <div class="tc-encrypt-container" style="margin-left:30px;">
-      <button class="tc-encrypt-button" onclick="encryptionFunction()"><a class="tc-button-text">Encrypt</a></button>
-      <button class="tc-encrypt-button" onclick="copyText('encrypt-input')"><a class="tc-button-text">Copy</a></button>
-      <button class="tc-encrypt-button" onclick="downloadLastKey()"><a class="tc-button-text">Download Key</a></button>
+    <div class="tc-row">
+      <div class="tc-text-blob-v2">
+        <h2 class="tc-default-text" style="font-size:30px; font-weight:bold;">Encryption Box:</h2>
+        <textarea id="encrypt-input" class="tc-auto-expand" rows="5" oninput="autoExpand(this)">Enter stuff here...</textarea>
+        <br>
+        <div class="tc-encrypt-container">
+          <button class="tc-encrypt-button" onclick="encryptionFunction()"><a class="tc-button-text">Encrypt</a></button>
+          <button class="tc-encrypt-button" onclick="copyText('encrypt-input')"><a class="tc-button-text">Copy Text</a></button>
+        </div>
+      </div>
     </div>
+
     <br>
     <br>
     <br>
-    <h2 class="tc-fancy-text" style="font-size:23px; font-weight:bold; margin-left:30px;">Your Key:</h2>
-    <button class="tc-copy-button" onclick="copyText('key-display')" style="margin-left:30px;"><a class="tc-button-text">Copy Key</a></button>
-    <div class="tc-key-container" style="margin-left:30px;">
-      <h3 id = "key-display" class="tc-long-key">...</h3>
+    <br>
+    <br>
+
+    <div class="tc-row">
+      <div class="tc-text-blob-v2">
+        <h2 class="tc-default-text" style="font-size:30px; font-weight:bold;">Key Box:</h2>
+        <div class="tc-encrypt-container">
+          <button class="tc-copy-button" onclick="copyText('key-display')"><a class="tc-button-text">Copy Key</a></button>
+          <button class="tc-copy-button" onclick="downloadLastKey()"><a class="tc-button-text">Download Key</a></button>
+        </div>
+        <br>
+        <div class="tc-key-container">
+          <a id="key-display" class="tc-long-key">...</a>
+        </div>
+      </div>
     </div>
   </div>
 
