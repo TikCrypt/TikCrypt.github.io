@@ -15,9 +15,12 @@
 
 <body class = "body">
   <nav id="nav-bar">
+    <button id="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <ul>
       <li class="nav-logo"><a href="/index.html">
-        <img class="nav-logo" src="/media/logo.png" alt="logo">
+        <img src="/media/logo.png" alt="logo">
         <span class="logo-text">TikCrypt</span>
       </a></li>
       <li><a href="/index.html" class="nav-text">Overview</a></li>
@@ -40,7 +43,10 @@
           <li><a href="/artefacts/reviews.html">Reviews</a></li>
         </ul>
       </li>
-      <li><a href="/index.html" class="nav-text" id="hide-button">Hide</a>
+      <li><a href="/index.html" class="nav-text">Tools</a>
+        <ul class="dropdown">
+          <li><a id="hide-button">Hide</a></li>
+        </ul>
       </li>
       <li><a href="/settings.html" class="nav-text">Settings</a>
       </li>
@@ -51,14 +57,14 @@
     <img src="/media/logo.png" alt="logo"><br>
     <br>
     <h2 class="fancy-text" style="font-size:45px; font-weight:bold; margin: 0px;">TikCrypt</h2><br>
-    <a class="default-text" style="font-size:25px;">Version 2.1.0</a>
+    <a class="default-text" style="font-size:25px;">Version 2.2.0</a>
   </div>
 
   <br>
 
   <div class="index-about-container">
     <h2 class="default-text" style="font-size:35px; font-weight:bold;">Who am I?</h2>
-    <a class="default-text" style="color:var(--space-bg-text-light);">
+    <a class="default-text-light">
       I'm a student who goes to school. I exist. Oh, and I'm a human.
     </a><br>
   </div>
@@ -74,7 +80,7 @@
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">TikCryption</h2>
       <a class="default-text" style="font-size:15px;">
       "Want more security in your messages?"</a><br>
-      <a class="default-text" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:15px; line-height:20px;">
       The first project on this list, TikCryption is software capable of encrypting and decrypting messages!
       Although it is not too be trusted for important messages.</a>
       <br>
@@ -84,7 +90,7 @@
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">The Nameless Hide Function</h2>
       <a class="default-text" style="font-size:15px;">
       "Want EVEN more security in your messages?"</a><br>
-      <a class="default-text" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:15px; line-height:20px;">
       The hide function can be toggled through the hide button on the navigation bar.
       This function comes hand in hand with TikCryption to ensure messages are sent and read securely.</a>
       <br>
@@ -94,7 +100,7 @@
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">Coin Simulator</h2>
       <a class="default-text" style="font-size:15px;">
       "Why use a real coin when you can use a completely useless virtual coin instead?"</a><br>
-      <a class="default-text" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:15px; line-height:20px;">
       Coin Simulator allows you to simulate a coin! Wait, why does the script end here?</a>
       <br>
     </div>
@@ -109,7 +115,7 @@
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">Cibophobia</h2>
       <a class="default-text" style="font-size:15px;">
       "Has Cibophobia ever killed? Best not find out..."</a><br>
-      <a class="default-text" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:15px; line-height:20px;">
       Cibophobia follows the journey of a crab as it endures waves of food from its incompetent owner!</a>
       <br>
     </div>
@@ -117,13 +123,13 @@
     <div class="index-text-blob">
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">Secret Function</h2>
       <a class="default-text" id="hint" style="font-size:15px;">"Find the eye of Jupiter"</a><br>
-      <a class="default-text" id="text-below-hint" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" id="text-below-hint" style="font-size:15px; line-height:20px;">
       Solve the puzzle to unlock the Secret Function. Make sure to check the hints above as they change throughout the puzzle!</a>
     </div>
 
     <div class="index-text-blob">
       <h2 class="default-text" style="font-size:18px; font-weight:bold;">Nothing Here Yet!</h2>
-      <a class="default-text" style="font-size:15px; line-height:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:15px; line-height:20px;">
       Like, there really is nothing here...</a>
     </div>
   </div>
@@ -139,7 +145,7 @@
       <a class="default-text" style="font-size:20px;">
       "Why does the Tik sound like TikTok"</a><br>
       <br>
-      <a class="default-text" style="font-size:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:20px;">
       Because my name has a Tik.</a>
       <br>
     </div>
@@ -148,7 +154,7 @@
       <a class="default-text" style="font-size:20px;">
       "What is your credit card number? - J"</a><br>
       <br>
-      <a class="default-text" style="font-size:20px; color:var(--space-bg-text-light);">
+      <a class="default-text-light" style="font-size:20px;">
       Oh, thats easy! Its ______________.</a>
     </div>
   </div>
@@ -160,10 +166,11 @@
   <h2 class="default-text" style="font-size:35px; font-weight:bold; margin-left:50px">Patch Notes</h2>
 
   <ul class="bullet-list">
-    <li class="default-text" style="color:var(--space-bg-text-light);">Cibophobia level 4 out now! 2 new enemies and a new boss!</li>
-    <li class="default-text" style="color:var(--space-bg-text-light);">Endless Mode now includes the new enemies and bosses!</li>
-    <li class="default-text" style="color:var(--space-bg-text-light);">New secret feature unlockable through a multi-step puzzle!</li>
-    <li class="default-text" style="color:var(--space-bg-text-light);">Minor update to TikCryption UI!</li>
+    <li class="default-text-light">The finale for Cibophobia, level 5!</li>
+    <li class="default-text-light">Coin Sim high scores are now saved in localStorage!</li>
+    <li class="default-text-light">The hide and secret function now live in the Tools section!</li>
+    <li class="default-text-light">Testing out experimental fixes for the UI when using mobile!</li>
+    <li class="default-text-light">The laptop/PC UI experience is still mostly unchanged!</li>
   </ul>
 
   <br>
@@ -173,9 +180,8 @@
   <h2 class="default-text" style="font-size:35px; font-weight:bold; margin-left:50px">Whats Next?</h2>
 
   <ul class="bullet-list">
-    <li class="default-text" style="color:var(--space-bg-text-light);">Level 5 for Cibophobia, which will be the finale to Cibophobia.</li>
-    <li class="default-text" style="color:var(--space-bg-text-light);">A scoreboard to keep track of an individual's high score.</li>
-    <li class="default-text" style="color:var(--space-bg-text-light);">Upgrades to TikCryption so it can compete with AES.</li>
+    <li class="default-text-light">Still thinking about possible improvements to TikCryption.</li>
+    <li class="default-text-light">The secret function puzzle was fun, considering a puzzle game for the future.</li>
   </ul>
 
   <br>

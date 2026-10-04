@@ -1,5 +1,5 @@
 const gameContainer = document.querySelector('.cp-game-container');
-const LEVEL_COUNT = 4;
+const LEVEL_COUNT = 5;
 const DIFFICULTIES = {
   easy: { label: 'Easy', lives: 5 },
   medium: { label: 'Medium', lives: 3 },
@@ -63,7 +63,7 @@ const LEVELS = {
   4: {
     duration: 120,
     maxWorms: 6,
-    maxFish: 2,
+    maxFish: 3,
     maxPrawns: 3,
     maxCatfish: 2,
     catfishFromSeconds: 10,
@@ -80,6 +80,29 @@ const LEVELS = {
       { at: 1, text: 'Catfish charge down a single lane.' },
       { at: 70, text: 'Endure, they cannot come forever.' },
       { at: 112, text: 'Is that an earthquake? No... it is something more...' },
+    ],
+  },
+  5: {
+    duration: 90,
+    maxWorms: 8,
+    maxFish: 3,
+    maxPrawns: 4,
+    maxCatfish: 3,
+    catfishFromSeconds: 8,
+    prawnFromSeconds: 4,
+    fishLastSeconds: 90,
+    speedMult: 1.1,
+    shooting: true,
+    boss: 'hands',
+    playerSrc: 'media/crab-cannon.png',
+    story: [
+      'The final stand has come!',
+      'Every hand turns against you!',
+    ],
+    messages: [
+      { at: 1, text: 'Fulfil your destiny!' },
+      { at: 45, text: 'Your vegeance awaits!' },
+      { at: 90, text: 'I shall be the hand in your destruction!' },
     ],
   },
   endless: {
@@ -463,6 +486,18 @@ const PRAWN_BOSS_HP = 30;
 const PRAWN_BOSS_SPEED = 6;
 const PRAWN_BOSS_SUMMON_TIME = 5;
 const PRAWN_BOSS_SUMMON_GAP = 0.5;
+
+const HAND_LEFT_SRC = 'media/left-hand.png';
+const HAND_RIGHT_SRC = 'media/right-hand.png';
+const HAND_W = 2;
+const HAND_H = 1.3;
+const HANDS_HP = 60;
+const HAND_ENTER_SPEED = 3;
+const HAND_SWAY_SPEED = 0.9;
+const HAND_SLIDE_SPEED = 6;
+const HAND_TELEGRAPH = 1.4;
+const HAND_LOCK_TIME = 0.7;
+const HAND_SWIPE_SPEED = 11;
 
 const BOSS_HIT_POINTS = 5;
 const BOSS_KILL_POINTS = 500;
@@ -874,6 +909,20 @@ function damageFaller(faller) {
   }
 }
 
+function bossPartHit(projectile) {
+  if (!boss || boss.phase === 'enter' || boss.phase === 'dead') return null;
+  const parts = boss.hands || [boss];
+  return (
+    parts.find(
+      (p) =>
+        projectile.col + 0.6 > p.x &&
+        projectile.col + 0.4 < p.x + p.w &&
+        p.row < projectile.prevRow + 0.4 &&
+        p.row + p.h > projectile.row
+    ) || null
+  );
+}
+
 function updateProjectiles(dt) {
   for (const projectile of [...projectiles]) {
     projectile.prevRow = projectile.row;
@@ -896,17 +945,10 @@ function updateProjectiles(dt) {
       continue;
     }
 
-    if (
-      boss &&
-      boss.phase !== 'enter' &&
-      boss.phase !== 'dead' &&
-      projectile.col + 0.6 > boss.x &&
-      projectile.col + 0.4 < boss.x + boss.w &&
-      boss.row < projectile.prevRow + 0.4 &&
-      boss.row + boss.h > projectile.row
-    ) {
+    const bossPart = bossPartHit(projectile);
+    if (bossPart) {
       removeProjectile(projectile);
-      damageBoss();
+      damageBoss(bossPart);
       if (!gameRunning) return;
       continue;
     }
@@ -945,6 +987,10 @@ function placeBoss() {
 function startBoss(grid, kind = currentLevel.boss) {
   if (kind === 'prawn') {
     startPrawnBoss(grid);
+    return;
+  }
+  if (kind === 'hands') {
+    startHandsBoss(grid);
     return;
   }
 
@@ -1012,10 +1058,12 @@ function showBossWarning(grid) {
 }
 
 function clearBossWarning() {
-  if (boss && boss.warnEl) {
+  if (!boss) return;
+  if (boss.warnEl) {
     boss.warnEl.remove();
     boss.warnEl = null;
   }
+  if (boss.hands) boss.hands.forEach(clearHandWarning);
 }
 
 function slideBoss(targetX, dt) {
@@ -1045,10 +1093,10 @@ function bossTouchesPlayer() {
   );
 }
 
-function damageBoss() {
+function damageBoss(part = boss) {
   boss.hp -= 1;
   addScore(BOSS_HIT_POINTS);
-  flashHit(boss.el);
+  flashHit(part.el);
   if (bossBar) bossBar.fill.style.width = `${Math.max(0, (boss.hp / boss.maxHp) * 100)}%`;
 
   if (boss.hp <= 0) {
@@ -1072,6 +1120,10 @@ function defeatBoss() {
 function updateBoss(dt, grid) {
   if (boss.kind === 'prawn') {
     updatePrawnBoss(dt, grid);
+    return;
+  }
+  if (boss.kind === 'hands') {
+    updateHandsBoss(dt, grid);
     return;
   }
 
@@ -1280,6 +1332,213 @@ function updatePrawnBoss(dt, grid) {
   placeBoss();
 }
 
+function makeHand(side) {
+  const left = side === 'left';
+  const el = document.createElement('img');
+  el.className = `cp-boss cp-hand cp-hand-${side}`;
+  el.src = left ? HAND_LEFT_SRC : HAND_RIGHT_SRC;
+  el.alt = left ? 'Left Hand' : 'Right Hand';
+  el.draggable = false;
+  el.style.cssText = `
+    position: absolute;
+    width: ${(HAND_W * 100) / GRID_COLS}%;
+    height: ${(HAND_H * 100) / GRID_ROWS}%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+  `;
+
+  return {
+    side,
+    el,
+    w: HAND_W,
+    h: HAND_H,
+    dir: left ? 1 : -1,
+    restX: left ? 0 : GRID_COLS - HAND_W,
+    x: left ? -HAND_W : GRID_COLS,
+    row: 0,
+    swayT: left ? 0 : Math.PI,
+    phase: 'enter',
+    phaseTimer: 0,
+    attackTimer: 0,
+    firstDelay: left ? 0 : 2,
+    lockRow: null,
+    warnEl: null,
+  };
+}
+
+function startHandsBoss(grid) {
+  const hands = [makeHand('left'), makeHand('right')];
+
+  boss = {
+    kind: 'hands',
+    hands,
+    phase: 'fight',
+    hp: scaledHp(HANDS_HP),
+    maxHp: scaledHp(HANDS_HP),
+    waveTimer: 2.5,
+    contactCooldown: 0,
+  };
+
+  for (const hand of hands) {
+    placeHand(hand);
+    grid.appendChild(hand.el);
+  }
+
+  if (bossBar) {
+    bossBar.bar.style.display = 'block';
+    bossBar.fill.style.width = '100%';
+  }
+  showMessage('Giant hands reach out from the deep!');
+}
+
+function placeHand(hand) {
+  hand.el.style.left = `${(hand.x * 100) / GRID_COLS}%`;
+  hand.el.style.top = `${(hand.row * 100) / GRID_ROWS}%`;
+}
+
+function handIdleRow(hand) {
+  return ((GRID_ROWS - hand.h) / 2) * (1 + Math.sin(hand.swayT));
+}
+
+function showHandWarning(hand, grid) {
+  const warn = document.createElement('div');
+  warn.className = 'cp-hand-warning';
+  warn.style.cssText = `
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: ${(hand.lockRow * 100) / GRID_ROWS}%;
+    height: ${(hand.h * 100) / GRID_ROWS}%;
+    box-sizing: border-box;
+    background: rgba(200, 40, 20, 0.22);
+    border-top: 3px solid rgba(200, 40, 20, 0.7);
+    border-bottom: 3px solid rgba(200, 40, 20, 0.7);
+    pointer-events: none;
+    z-index: 0;
+    animation: cp-warn-flash 0.2s steps(2) infinite alternate;
+  `;
+  grid.appendChild(warn);
+  hand.warnEl = warn;
+}
+
+function clearHandWarning(hand) {
+  if (hand.warnEl) {
+    hand.warnEl.remove();
+    hand.warnEl = null;
+  }
+}
+
+function handTouchesPlayer(hand) {
+  return (
+    playerCol + 1 > hand.x + 0.2 &&
+    playerCol < hand.x + hand.w - 0.2 &&
+    playerRow + 1 > hand.row + 0.2 &&
+    playerRow < hand.row + hand.h - 0.2
+  );
+}
+
+function spawnHandsWave(grid) {
+  if (fallers.length >= 10) return;
+
+  const rage = boss.hp / boss.maxHp;
+  const count = 3 + (rage < 0.5 ? 1 : 0) + (rage < 0.25 ? 1 : 0);
+  const columns = Array.from({ length: GRID_COLS }, (_, i) => i).sort(() => Math.random() - 0.5);
+  const types = ['worm', 'worm', 'fish', 'prawn', 'catfish'];
+  const caps = { worm: 6, fish: 4, prawn: 4, catfish: 2 };
+
+  for (const col of columns.slice(0, count)) {
+    const type = types[Math.floor(Math.random() * types.length)];
+    if (fallers.filter((f) => f.type === type).length >= caps[type]) continue;
+    createFaller(grid, type, col, -1, 1.15);
+  }
+}
+
+function updateHand(hand, dt, rage, other, grid) {
+  const maxRow = GRID_ROWS - hand.h;
+
+  if (hand.phase === 'enter') {
+    hand.swayT += dt * HAND_SWAY_SPEED;
+    hand.row = handIdleRow(hand);
+    const step = HAND_ENTER_SPEED * dt;
+    hand.x += clamp(hand.restX - hand.x, -step, step);
+    if (Math.abs(hand.x - hand.restX) < 0.01) {
+      hand.x = hand.restX;
+      hand.phase = 'idle';
+      hand.attackTimer = randomBetween(2.5, 4.5) * (0.5 + 0.5 * rage) + hand.firstDelay;
+      hand.firstDelay = 0;
+    }
+  } else if (hand.phase === 'idle') {
+    hand.swayT += dt * HAND_SWAY_SPEED;
+    hand.row = handIdleRow(hand);
+    hand.attackTimer -= dt;
+
+    if (hand.attackTimer <= 0) {
+      const otherBusy = other.phase === 'telegraph' || other.phase === 'swipe';
+      if (otherBusy && rage >= 0.4) {
+        hand.attackTimer = 0.3;
+      } else {
+        hand.phase = 'telegraph';
+        hand.phaseTimer = HAND_TELEGRAPH;
+        hand.lockRow = null;
+      }
+    }
+  } else if (hand.phase === 'telegraph') {
+    hand.phaseTimer -= dt;
+    const step = HAND_SLIDE_SPEED * dt;
+
+    if (hand.lockRow === null) {
+      hand.row += clamp(clamp(playerRow - 0.15, 0, maxRow) - hand.row, -step, step);
+      if (hand.phaseTimer <= HAND_LOCK_TIME) {
+        hand.lockRow = clamp(playerRow - 0.15, 0, maxRow);
+        showHandWarning(hand, grid);
+      }
+    } else {
+      hand.row += clamp(hand.lockRow - hand.row, -step, step);
+      hand.el.style.translate = `0 ${(Math.random() - 0.5) * 6}px`;
+    }
+
+    if (hand.lockRow !== null && hand.phaseTimer <= 0 && Math.abs(hand.row - hand.lockRow) < 0.05) {
+      hand.row = hand.lockRow;
+      hand.el.style.translate = '';
+      clearHandWarning(hand);
+      hand.phase = 'swipe';
+    }
+  } else if (hand.phase === 'swipe') {
+    hand.x += hand.dir * HAND_SWIPE_SPEED * (1 + 0.3 * (1 - rage)) * dt;
+    const gone = hand.dir > 0 ? hand.x >= GRID_COLS : hand.x <= -hand.w;
+    if (gone) {
+      hand.x = hand.dir > 0 ? -hand.w : GRID_COLS;
+      hand.phase = 'enter';
+    }
+  }
+}
+
+function updateHandsBoss(dt, grid) {
+  boss.contactCooldown = Math.max(0, boss.contactCooldown - dt);
+  const rage = boss.hp / boss.maxHp;
+
+  boss.waveTimer -= dt;
+  if (boss.waveTimer <= 0) {
+    spawnHandsWave(grid);
+    boss.waveTimer = randomBetween(4.5, 6.5) * (0.6 + 0.4 * rage);
+  }
+
+  const [left, right] = boss.hands;
+  updateHand(left, dt, rage, right, grid);
+  updateHand(right, dt, rage, left, grid);
+
+  for (const hand of boss.hands) {
+    const dangerous = hand.phase === 'idle' || hand.phase === 'swipe';
+    if (dangerous && boss.contactCooldown <= 0 && handTouchesPlayer(hand)) {
+      boss.contactCooldown = BOSS_CONTACT_COOLDOWN;
+      takeDamage();
+      if (!gameRunning) return;
+    }
+    placeHand(hand);
+  }
+}
+
 let lives = 0;
 let livesDisplay = null;
 let gameRunning = false;
@@ -1447,7 +1706,11 @@ function finishLevel() {
   showEndScreen(
     'Level Complete!',
     `Lives left: ${lives} | Score: ${score}`,
-    nextLevel ? `Level ${nextLevel} unlocked!` : ''
+    nextLevel
+      ? `Level ${nextLevel} unlocked!`
+      : currentLevelId === LEVEL_COUNT
+        ? 'Your vengeance is complete!'
+        : ''
   );
 }
 

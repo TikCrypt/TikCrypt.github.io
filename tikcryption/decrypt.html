@@ -14,9 +14,12 @@
 
 <body class = "tc-body">
   <nav id="nav-bar">
+    <button id="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <ul>
       <li class="nav-logo"><a href="/index.html">
-        <img class="nav-logo" src="/media/logo.png" alt="logo">
+        <img src="/media/logo.png" alt="logo">
         <span class="logo-text">TikCrypt</span>
       </a></li>
       <li><a href="/index.html" class="nav-text">Overview</a></li>
@@ -39,7 +42,10 @@
           <li><a href="/artefacts/reviews.html">Reviews</a></li>
         </ul>
       </li>
-      <li><a href="/index.html" class="nav-text" id="hide-button">Hide</a>
+      <li><a href="/index.html" class="nav-text">Tools</a>
+        <ul class="dropdown">
+          <li><a id="hide-button">Hide</a></li>
+        </ul>
       </li>
       <li><a href="/settings.html" class="nav-text">Settings</a>
       </li>

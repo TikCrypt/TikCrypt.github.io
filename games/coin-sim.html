@@ -15,9 +15,12 @@
 
 <body class = "body" style="background-color:var(--space-bg)">
   <nav id="nav-bar">
+    <button id="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <ul>
       <li class="nav-logo"><a href="/index.html">
-        <img class="nav-logo" src="/media/logo.png" alt="logo">
+        <img src="/media/logo.png" alt="logo">
         <span class="logo-text">TikCrypt</span>
       </a></li>
       <li><a href="/index.html" class="nav-text">Overview</a></li>
@@ -40,7 +43,10 @@
           <li><a href="/artefacts/reviews.html">Reviews</a></li>
         </ul>
       </li>
-      <li><a href="/index.html" class="nav-text" id="hide-button">Hide</a>
+      <li><a href="/index.html" class="nav-text">Tools</a>
+        <ul class="dropdown">
+          <li><a id="hide-button">Hide</a></li>
+        </ul>
       </li>
       <li><a href="/settings.html" class="nav-text">Settings</a>
       </li>
@@ -61,8 +67,24 @@
       </div>
 
       <div style="flex:none; width:300px; height:451px; justify-content:center; border-left:5px solid var(--space-bg-text);">
-        <a class="cs-default-text">Spacebar = Pause/Unpause</a><br>
-        <a class="cs-default-text">Left Click = Spin</a>
+        <div class="cs-speed-counters">
+          <a class="cs-default-text"><strong>Top Speed: </strong></a>
+          <a class="cs-default-text" id="top-speed">10</a><br>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div class="cs-speed-counters">
+          <a class="cs-default-text"><strong>Current Speed: </strong></a>
+          <a class="cs-default-text" id="current-speed">1</a><br>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <a class="cs-default-text" style="font-size:25px; font-weight:bold;"><u>How to Play:</u></a><br>
+        <a class="cs-default-text"><strong>Spacebar</strong> = Pause/Unpause</a><br>
+        <a class="cs-default-text"><strong>Left Click</strong> = Spin</a>
       </div>
     </div>
 

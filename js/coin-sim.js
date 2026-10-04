@@ -49,45 +49,39 @@ if (getComputedStyle(container).position === 'static') {
   container.style.position = 'relative';
 }
 
-const oldGauge = document.getElementById('speed-gauge');
-if (oldGauge) oldGauge.remove();
-
-const hud = document.createElement('div');
-hud.style.cssText = `
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  padding: 6px 12px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-radius: 6px;
-  color: #fff;
-  font-family: monospace;
-  font-weight: bold;
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 1px;
-  pointer-events: none;
-  user-select: none;
-  z-index: 10;
-`;
-
-const hudLabel = document.createElement('div');
-hudLabel.textContent = 'Speed:';
-hudLabel.style.cssText = 'font-size: 11px; color: #fff; opacity: 0.9;';
-
-const speedGauge = document.createElement('div');
-speedGauge.id = 'speed-gauge';
-speedGauge.style.cssText = 'font-size: 28px; line-height: 1.1;';
-speedGauge.textContent = '1';
-
-hud.append(hudLabel, speedGauge);
-container.appendChild(hud);
-
 const minSpeed = 0.01;
 const maxSpeed = 5;
 const speedDecay = 0.98;
 let spinSpeed = 0.01;
 
 let isPaused = false;
+
+const TOP_SPEED_KEY = 'coinTopSpeed';
+const currentSpeedEl = document.getElementById('current-speed');
+const topSpeedEl = document.getElementById('top-speed');
+
+function toDisplaySpeed(speed) {
+  return Math.round(speed * 1000) / 10;
+}
+
+let topSpeed = 0;
+try {
+  const stored = parseFloat(localStorage.getItem(TOP_SPEED_KEY));
+  if (Number.isFinite(stored) && stored > 0) topSpeed = stored;
+} catch {}
+
+function updateSpeedDisplays() {
+  if (spinSpeed > topSpeed) {
+    topSpeed = spinSpeed;
+    try { localStorage.setItem(TOP_SPEED_KEY, String(topSpeed)); } catch {}
+  }
+
+  const current = toDisplaySpeed(spinSpeed);
+  if (currentSpeedEl) currentSpeedEl.textContent = current;
+  if (topSpeedEl) topSpeedEl.textContent = toDisplaySpeed(topSpeed);
+}
+
+updateSpeedDisplays();
 
 document.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
@@ -107,7 +101,7 @@ function animate() {
       spinSpeed = minSpeed + (spinSpeed - minSpeed) * speedDecay;
     }
 
-    speedGauge.textContent = Math.round(spinSpeed * 1000) / 10;
+    updateSpeedDisplays();
   }
 
   renderer.render(scene, camera);
@@ -133,6 +127,7 @@ function onCoinClick(event) {
   if (spinSpeed <= (maxSpeed + 0.25)) {
     if (intersects.length > 0) {
         spinSpeed += 0.06;
+        updateSpeedDisplays();
         console.log('Coin clicked!');
         console.log("Current Speed" + spinSpeed)
     }

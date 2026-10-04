@@ -40,7 +40,7 @@ setSwapped(localStorage.getItem(SWAP_KEY) === '1');
   const ACTIVE_KEY = 'hideEffectActive';
   const SETTINGS = {
     color:   { key: 'hideEffectColor',   default: '#000000' },
-    size:    { key: 'hideEffectSize',    default: '60' },
+    size:    { key: 'hideEffectSize',    default: '120' },
     opacity: { key: 'hideEffectOpacity', default: '1' }
   };
 
@@ -227,7 +227,7 @@ setSwapped(localStorage.getItem(SWAP_KEY) === '1');
 const HINT_KEY = 'puzzleStage';
 const SCROLL_KEY = 'puzzleScroll';
 const DISCO_KEY = 'discoUnlocked';
-const DISCO_TEXT = '"Puzzle Solved! Disco Feature now Available at the nav bar!" \n \n WARNING: MAY TRIGGER EPILEPSY \n';
+const DISCO_TEXT = '"Puzzle Solved! Disco feature now Available in Tools!" \n \n WARNING: MAY TRIGGER EPILEPSY \n';
 
 const HINTS = {
   1: '"A star burns yellow on mars."',
@@ -239,15 +239,19 @@ const HINTS = {
 const FINAL_STAGE = Math.max(...Object.keys(HINTS).map(Number));
 
 function addDiscoToNav() {
-  const list = document.querySelector('#nav-bar > ul');
-  if (!list || document.getElementById('disco-nav-item')) return;
+  if (document.getElementById('disco-nav-item')) return;
+
+  const hideButton = document.getElementById('hide-button');
+  const list = hideButton
+    ? hideButton.closest('.dropdown')
+    : document.querySelector('#nav-bar > ul');
+  if (!list) return;
 
   const item = document.createElement('li');
   item.id = 'disco-nav-item';
 
   const link = document.createElement('a');
   link.href = '#';
-  link.className = 'nav-text';
   link.textContent = 'Disco';
   link.addEventListener('click', (event) => {
     event.preventDefault();
@@ -737,6 +741,8 @@ function getKey() {
 
 })();
 
+
+
 //This is the dropdown code.
 const dropdownParents = document.querySelectorAll('nav li:has(.dropdown)');
 
@@ -756,12 +762,33 @@ dropdownParents.forEach((item) => {
   });
 });
 
+
+
 //Closes the dropdown if the user clicks anywhere outside the nav
 document.addEventListener('click', (e) => {
   if (!e.target.closest('nav')) {
     dropdownParents.forEach((item) => item.classList.remove('open'));
   }
 });
+
+const navBar = document.getElementById('nav-bar');
+const navToggle = document.getElementById('nav-toggle');
+
+if (navBar && navToggle) {
+  navToggle.addEventListener('click', () => {
+    const open = navBar.classList.toggle('nav-open');
+    navToggle.setAttribute('aria-expanded', String(open));
+  });
+
+  window.matchMedia('(min-width: 1101px)').addEventListener('change', (e) => {
+    if (e.matches) {
+      navBar.classList.remove('nav-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+
 
 //The function to copy stuff
 function copyText(elementId) {
